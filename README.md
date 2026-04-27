@@ -21,28 +21,32 @@ ScriptsLab is a powerful, production-ready plugin framework for Paper/Spigot ser
 
 ### Why ScriptsLab?
 
-- 🚀 **Zero Restart Required** - Hot-reload scripts without restarting your server
-- 🎯 **Clean Architecture** - Modular design with dependency injection
-- ⚡ **High Performance** - Powered by GraalVM JavaScript engine
-- 🔒 **Thread-Safe** - Automatic synchronization for Bukkit API calls
-- 🎨 **Rich API** - Commands, events, items, storage, scheduler, and more
-- 📦 **Module System** - Organize code into reusable modules
-- 🛠️ **Developer Friendly** - Modern JavaScript with full IDE support
+| Feature | Description |
+|---------|-------------|
+| 🚀 **Zero Restart Required** | Hot-reload scripts without restarting your server |
+| 🎯 **Clean Architecture** | Modular design with dependency injection |
+| ⚡ **High Performance** | Powered by GraalVM JavaScript engine |
+| 🔒 **Thread-Safe** | Automatic synchronization for Bukkit API calls |
+| 🎨 **Rich API** | Commands, events, items, storage, scheduler, and more |
+| 📦 **Module System** | Organize code into reusable modules |
+| 🛠️ **Developer Friendly** | Modern JavaScript with full IDE support |
 
 ---
 
 ## ✨ Features
 
 ### Core Features
-- **🎮 Command System** - Register custom commands with permissions
-- **📡 Event System** - Listen to any Bukkit/Paper event
-- **⚔️ Custom Items** - Create items with custom abilities and attributes
-- **💾 Storage System** - YAML-based persistent data storage
-- **⏰ Task Scheduler** - Sync/async task scheduling
-- **📊 Metrics Collection** - Built-in performance monitoring
-- **🔌 Module System** - Hot-loadable plugin modules
+
+- 🎮 **Command System** - Register custom commands with permissions
+- 📡 **Event System** - Listen to any Bukkit/Paper event
+- ⚔️ **Custom Items** - Create items with custom abilities and attributes
+- 💾 **Storage System** - YAML-based persistent data storage
+- ⏰ **Task Scheduler** - Sync/async task scheduling
+- 📊 **Metrics Collection** - Built-in performance monitoring
+- 🔌 **Module System** - Hot-loadable plugin modules
 
 ### Advanced Features
+
 - **Thread-Safe API** - Automatic main-thread scheduling for Bukkit calls
 - **Dependency Injection** - Clean service architecture
 - **Event Bus** - Internal plugin communication
@@ -54,9 +58,12 @@ ScriptsLab is a powerful, production-ready plugin framework for Paper/Spigot ser
 ## 📦 Installation
 
 ### Requirements
-- **Minecraft Server**: Paper 1.21.8+ (or compatible Spigot fork)
-- **Java**: 17 or higher
-- **Memory**: Minimum 2GB RAM (GraalVM included in JAR)
+
+| Requirement | Version |
+|--------------|---------|
+| Minecraft Server | Paper 1.21.8+ (or compatible Spigot fork) |
+| Java | 17 or higher |
+| Memory | Minimum 2GB RAM (GraalVM included in JAR) |
 
 ### Steps
 
@@ -64,7 +71,6 @@ ScriptsLab is a powerful, production-ready plugin framework for Paper/Spigot ser
 
 2. **Install** the plugin:
    ```bash
-   # Place JAR in your server's plugins folder
    cp ScriptsLab-1.0.0.jar /path/to/server/plugins/
    ```
 
@@ -88,7 +94,6 @@ ScriptsLab is a powerful, production-ready plugin framework for Paper/Spigot ser
 Create a file `plugins/ScriptsLab/scripts/hello.js`:
 
 ```javascript
-// Register a simple command
 Commands.register('hello', function(sender, args) {
     sender.sendMessage('§aHello, ' + sender.getName() + '!');
 }, 'scriptslab.hello');
@@ -125,10 +130,8 @@ API.registerEvent('PlayerJoinEvent', function(event) {
     var player = event.getPlayer();
     var Bukkit = Java.type('org.bukkit.Bukkit');
     
-    // Remove vanilla message
     event.joinMessage(null);
     
-    // Send custom welcome
     player.sendMessage('§6§l⚡ Welcome to the server!');
     player.sendMessage('§7Online: §a' + Bukkit.getOnlinePlayers().size());
 });
@@ -142,10 +145,8 @@ API.registerEvent('PlayerJoinEvent', function(event) {
 
 #### Commands API
 ```javascript
-// Register command
 Commands.register(name, handler, permission);
 
-// Example
 Commands.register('heal', function(sender, args) {
     sender.setHealth(sender.getMaxHealth());
     sender.sendMessage('§aHealed!');
@@ -154,10 +155,8 @@ Commands.register('heal', function(sender, args) {
 
 #### Events API
 ```javascript
-// Register event handler
 API.registerEvent(eventName, handler);
 
-// Example
 API.registerEvent('PlayerDeathEvent', function(event) {
     var player = event.getPlayer();
     Console.log(player.getName() + ' died!');
@@ -166,29 +165,21 @@ API.registerEvent('PlayerDeathEvent', function(event) {
 
 #### Items API
 ```javascript
-// Create custom item
 Items.registerItem(id, material, displayName, ...lore);
-
-// Give item to player
 Items.giveItem(player, itemId, amount);
-
-// Add attributes (thread-safe)
 API.addAttribute(meta, 'GENERIC_ATTACK_DAMAGE', 'modifier_name', 10.0, 'ADD_NUMBER', 'HAND');
 ```
 
 #### Scheduler API
 ```javascript
-// Run task later (ticks)
 Scheduler.runLater(function() {
     Console.log('Delayed task!');
-}, 20); // 1 second
+}, 20);
 
-// Run repeating task
 Scheduler.runTimer(function() {
     Console.log('Every second!');
-}, 0, 20); // delay, period
+}, 0, 20);
 
-// Run async task
 Scheduler.runAsync(function() {
     // Heavy computation
 });
@@ -196,20 +187,14 @@ Scheduler.runAsync(function() {
 
 #### Storage API
 ```javascript
-// Get repository
 var repo = Storage.getRepository('mydata');
-
-// Save data
 repo.set('player.uuid', playerData);
 repo.save();
-
-// Load data
 var data = repo.get('player.uuid');
 ```
 
 #### Thread-Safe Bukkit API
 ```javascript
-// These methods automatically run on main thread
 API.addPotionEffectSync(player, effectType, duration, amplifier, ambient, particles);
 API.strikeLightningSync(location);
 API.removePotionEffectSync(player, effectType);
@@ -234,7 +219,6 @@ Complete example of a custom weapon with abilities:
 var Material = Java.type('org.bukkit.Material');
 var ItemStack = Java.type('org.bukkit.inventory.ItemStack');
 
-// Command to get the sword
 Commands.register('getlightningsword', function(sender, args) {
     if (!sender.isPlayer()) return;
     
@@ -245,7 +229,6 @@ Commands.register('getlightningsword', function(sender, args) {
     meta.setDisplayName('§6§l⚡ LIGHTNING SWORD ⚡');
     meta.setUnbreakable(true);
     
-    // Add attributes
     API.addAttribute(meta, 'GENERIC_ATTACK_DAMAGE', 'lightning_damage', 10.0, 'ADD_NUMBER', 'HAND');
     API.addAttribute(meta, 'GENERIC_ATTACK_SPEED', 'lightning_speed', 0.8, 'ADD_NUMBER', 'HAND');
     
@@ -254,7 +237,6 @@ Commands.register('getlightningsword', function(sender, args) {
     player.sendMessage('§6⚡ You received the Lightning Sword!');
 });
 
-// Strike lightning on hit
 API.registerEvent('EntityDamageByEntityEvent', function(event) {
     var Player = Java.type('org.bukkit.entity.Player');
     if (!(event.getDamager() instanceof Player)) return;
@@ -267,7 +249,6 @@ API.registerEvent('EntityDamageByEntityEvent', function(event) {
         if (meta && meta.hasDisplayName() && 
             meta.getDisplayName().indexOf('LIGHTNING SWORD') !== -1) {
             
-            // Strike lightning (thread-safe)
             var location = event.getEntity().getLocation();
             API.strikeLightningSync(location);
             
@@ -310,19 +291,22 @@ ScriptsLab follows **Clean Architecture** principles:
 
 ### Key Components
 
-- **GraalScriptEngine** - GraalVM JavaScript execution
-- **CommandManager** - Dynamic command registration
-- **EventBus** - Event handling and distribution
-- **ItemManager** - Custom item management
-- **StorageManager** - Persistent data storage
-- **TaskScheduler** - Async/sync task scheduling
-- **DI Container** - Dependency injection
+| Component | Description |
+|-----------|-------------|
+| **GraalScriptEngine** | GraalVM JavaScript execution |
+| **CommandManager** | Dynamic command registration |
+| **EventBus** | Event handling and distribution |
+| **ItemManager** | Custom item management |
+| **StorageManager** | Persistent data storage |
+| **TaskScheduler** | Async/sync task scheduling |
+| **DI Container** | Dependency injection |
 
 ---
 
 ## 🔧 Building from Source
 
 ### Prerequisites
+
 - Java 17 JDK
 - Maven 3.8+
 - Git
@@ -330,27 +314,19 @@ ScriptsLab follows **Clean Architecture** principles:
 ### Build Steps
 
 ```bash
-# Clone repository
 git clone https://github.com/yourusername/ScriptsLab.git
 cd ScriptsLab
-
-# Build with Maven
 mvn clean package -DskipTests
-
-# Output: target/ScriptsLab-1.0.0.jar (~50MB with GraalVM)
 ```
+
+Output: `target/ScriptsLab-1.0.0.jar` (~50MB with GraalVM)
 
 ### Development
 
 ```bash
-# Run tests
-mvn test
-
-# Generate documentation
-mvn javadoc:javadoc
-
-# Clean build
-mvn clean
+mvn test           # Run tests
+mvn javadoc:javadoc  # Generate documentation
+mvn clean         # Clean build
 ```
 
 ---
@@ -403,5 +379,3 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ⭐ Star us on GitHub if you find this useful!
 
 </div>
-#   S c r i p t s L a b  
- 
