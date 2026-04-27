@@ -1,0 +1,54 @@
+name: ScriptsLab
+version: ${project.version}
+main: com.scriptslab.ScriptsLabPlugin
+api-version: '1.20'
+author: ScriptsLab Team
+description: Production-grade scriptable plugin framework - Your laboratory for Minecraft scripting
+website: https://github.com/scriptslab/scriptslab
+
+commands:
+  scriptslab:
+    description: Main ScriptsLab command
+    usage: /scriptslab <reload|info|help>
+    aliases: [sl, slab]
+    permission: scriptslab.use
+  
+  module:
+    description: Module management command
+    usage: /module <list|enable|disable|reload> [name]
+    permission: scriptslab.module
+  
+  script:
+    description: Script management command
+    usage: /script <list|reload|info> [name]
+    permission: scriptslab.script
+
+permissions:
+  scriptslab.*:
+    description: All ScriptsLab permissions
+    children:
+      scriptslab.use: true
+      scriptslab.reload: true
+      scriptslab.module: true
+      scriptslab.script: true
+      scriptslab.admin: true
+  
+  scriptslab.use:
+    description: Use basic ScriptsLab commands
+    default: true
+  
+  scriptslab.reload:
+    description: Reload the plugin
+    default: op
+  
+  scriptslab.module:
+    description: Manage modules
+    default: op
+  
+  scriptslab.script:
+    description: Manage scripts
+    default: op
+  
+  scriptslab.admin:
+    description: Full administrative access
+    default: op

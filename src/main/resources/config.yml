@@ -1,0 +1,86 @@
+# ScriptsLab Configuration
+# Production-grade scriptable plugin framework
+
+# General Settings
+general:
+  # Plugin language (en, ru)
+  language: en
+  
+  # Enable debug mode (more verbose logging)
+  debug: false
+  
+  # Auto-save interval in minutes
+  auto-save-interval: 5
+
+# Script Engine Settings
+scripts:
+  # Enable JavaScript scripting engine
+  enabled: true
+  
+  # Auto-reload scripts on file change
+  auto-reload: true
+  
+  # Script execution timeout in milliseconds
+  timeout: 5000
+  
+  # Maximum memory per script context (MB)
+  max-memory: 128
+
+# Module System Settings
+modules:
+  # Auto-load modules on startup
+  auto-load: true
+  
+  # Modules to load (empty = load all)
+  enabled-modules:
+    - demo
+  
+  # Modules to explicitly disable
+  disabled-modules: []
+
+# Storage Settings
+storage:
+  # Storage provider: yaml, json, sqlite
+  provider: yaml
+  
+  # Enable caching
+  cache-enabled: true
+  
+  # Cache size (number of entries)
+  cache-size: 1000
+  
+  # Auto-save on shutdown
+  auto-save: true
+
+# Performance Settings
+performance:
+  # Enable metrics collection
+  metrics-enabled: true
+  
+  # Async task pool size
+  async-pool-size: 4
+  
+  # Event processing threads
+  event-threads: 2
+
+# Security Settings
+security:
+  # Enable script sandboxing (RECOMMENDED for public servers)
+  # true = Restricted mode (safe, limited access)
+  # false = Unrestricted mode (full access, use only on private servers!)
+  sandbox-enabled: false
+  
+  # Allowed Java packages in sandbox mode
+  allowed-packages:
+    - org.bukkit
+    - net.kyori
+    - java.util
+    - java.lang
+  
+  # Block dangerous operations
+  blocked-operations:
+    - file-write        # Запись в файлы
+    - file-delete       # Удаление файлов
+    - system-exec       # Выполнение системных команд
+    - network-access    # Сетевые запросы
+    - reflection        # Java Reflection API

@@ -1,0 +1,96 @@
+# ScriptsLab Messages
+# Color codes: & for legacy colors, MiniMessage format supported
+
+# General Messages
+general:
+  prefix: "&6[ScriptsLab]&r "
+  no-permission: "&cYou don't have permission to do that!"
+  player-only: "&cThis command can only be used by players!"
+  unknown-command: "&cUnknown command. Use /scriptslab help"
+  reload-success: "&aScriptsLab reloaded successfully!"
+  reload-failed: "&cFailed to reload: {error}"
+
+# Module Messages
+modules:
+  list-header: "&6╔═══════════════════════════════════════╗\n&6║           Loaded Modules              ║\n&6╚═══════════════════════════════════════╝"
+  list-empty: "&7No modules loaded"
+  list-entry: "&e{name} &7v{version} {status}"
+  list-footer: "&7Total: &e{count} &7modules"
+  
+  status-enabled: "&a✓ Enabled"
+  status-disabled: "&c✗ Disabled"
+  
+  not-found: "&cModule not found: {name}"
+  already-enabled: "&eModule is already enabled: {name}"
+  already-disabled: "&eModule is already disabled: {name}"
+  
+  enabling: "&6Enabling module: {name}"
+  enabled: "&aModule enabled: {name}"
+  enable-failed: "&cFailed to enable module: {error}"
+  
+  disabling: "&6Disabling module: {name}"
+  disabled: "&aModule disabled: {name}"
+  disable-failed: "&cFailed to disable module: {error}"
+  
+  reloading: "&6Reloading module: {name}"
+  reloaded: "&aModule reloaded: {name}"
+  reload-failed: "&cFailed to reload module: {error}"
+
+# Script Messages
+scripts:
+  list-header: "&6╔═══════════════════════════════════════╗\n&6║           Loaded Scripts              ║\n&6╚═══════════════════════════════════════╝"
+  list-empty: "&7No scripts loaded"
+  list-entry: "&e{name} {status} &7(executed {count} times)"
+  list-footer: "&7Total: &e{count} &7scripts"
+  
+  status-ok: "&a✓ OK"
+  status-error: "&c✗ Error"
+  
+  not-found: "&cScript not found: {name}"
+  
+  reloading: "&6Reloading script: {name}"
+  reloading-all: "&6Reloading all scripts..."
+  reloaded: "&aScript reloaded: {name}"
+  reloaded-all: "&aReloaded {count} scripts"
+  reload-failed: "&cFailed to reload script: {error}"
+  
+  info-header: "&6╔═══════════════════════════════════════╗\n&6║         Script Information            ║\n&6╚═══════════════════════════════════════╝"
+  info-id: "&eID: &f{id}"
+  info-path: "&ePath: &f{path}"
+  info-executions: "&eExecutions: &f{count}"
+  info-status: "&eStatus: {status}"
+  info-error: "&cLast error: &7{error}"
+
+# Command Messages
+commands:
+  help-header: "&6╔═══════════════════════════════════════╗\n&6║         ScriptsLab Commands           ║\n&6╚═══════════════════════════════════════╝"
+  help-scriptslab: "&e/scriptslab reload &7- Reload the plugin"
+  help-scriptslab-info: "&e/scriptslab info &7- Show plugin information"
+  help-scriptslab-help: "&e/scriptslab help &7- Show this help"
+  help-module: "&e/module list &7- List all modules"
+  help-script: "&e/script list &7- List all scripts"
+  
+  info-header: "&6╔═══════════════════════════════════════╗\n&6║         ScriptsLab Information        ║\n&6╚═══════════════════════════════════════╝"
+  info-version: "&eVersion: &f{version}"
+  info-authors: "&eAuthors: &f{authors}"
+  info-modules-loaded: "&eModules loaded: &f{count}"
+  info-modules-enabled: "&eModules enabled: &f{count}"
+  info-scripts-loaded: "&eScripts loaded: &f{count}"
+  info-items: "&eCustom items: &f{count}"
+  info-tasks: "&eActive tasks: &f{count}"
+
+# Error Messages
+errors:
+  internal: "&cAn internal error occurred. Check console for details."
+  module-load: "&cFailed to load module {name}: {error}"
+  script-load: "&cFailed to load script {name}: {error}"
+  script-execute: "&cScript execution error in {name}: {error}"
+  config-load: "&cFailed to load configuration: {error}"
+  storage-error: "&cStorage error: {error}"
+
+# Success Messages
+success:
+  module-loaded: "&aModule loaded: {name}"
+  script-loaded: "&aScript loaded: {name}"
+  config-saved: "&aConfiguration saved"
+  data-saved: "&aData saved successfully"

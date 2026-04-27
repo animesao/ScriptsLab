@@ -1,0 +1,18 @@
+# Demo Module Configuration
+
+id: demo
+name: Demo Module
+version: 1.0.0
+description: Demonstration module showcasing framework capabilities
+authors:
+  - Framework Team
+
+# Dependencies
+dependencies: []
+soft-dependencies: []
+
+# Load order: STARTUP, POSTWORLD, or LAZY
+load-order: STARTUP
+
+# Enabled by default
+enabled: true
