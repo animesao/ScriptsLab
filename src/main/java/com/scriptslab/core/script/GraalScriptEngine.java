@@ -46,7 +46,14 @@ public final class GraalScriptEngine implements ScriptEngine {
     
     @Override
     public CompletableFuture<Void> initialize() {
-        return CompletableFuture.runAsync(() -> {
+        return CompletableFuture.runAsync(() -> initializeCore(), executor);
+    }
+    
+    public void initializeSync() {
+        initializeCore();
+    }
+    
+    private void initializeCore() {
             if (initialized.get()) {
                 logger.warning("Script engine already initialized");
                 return;
@@ -108,9 +115,10 @@ public final class GraalScriptEngine implements ScriptEngine {
                             .allowIO(org.graalvm.polyglot.io.IOAccess.NONE); // No file access
                     
                     logger.info("Script engine initialized in SANDBOX mode (restricted)");
-                } else {
+} else {
                     // Unrestricted mode - full access (use with caution!)
                     contextBuilder
+                            .allowAllAccess(true)
                             .allowHostAccess(org.graalvm.polyglot.HostAccess.ALL)
                             .allowHostClassLookup(className -> true)
                             .allowIO(org.graalvm.polyglot.io.IOAccess.ALL)
@@ -118,7 +126,7 @@ public final class GraalScriptEngine implements ScriptEngine {
                             .allowCreateProcess(true)
                             .allowEnvironmentAccess(org.graalvm.polyglot.EnvironmentAccess.INHERIT)
                             .allowPolyglotAccess(org.graalvm.polyglot.PolyglotAccess.ALL);
-                    
+
                     logger.warning("Script engine initialized in UNRESTRICTED mode - scripts have full access!");
                 }
                 
@@ -157,7 +165,6 @@ public final class GraalScriptEngine implements ScriptEngine {
                 logger.log(Level.SEVERE, "Failed to initialize script engine", e);
                 throw new RuntimeException(e);
             }
-        }, executor);
     }
     
     private void resetGraalVMState() {

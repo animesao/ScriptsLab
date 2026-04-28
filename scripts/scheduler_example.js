@@ -12,8 +12,7 @@ API.runLater(function() {
 
 console.log("Delayed task scheduled");
 
-// NOTE: runTimer() removed due to GraalVM multithreading restrictions
-// JavaScript callbacks cannot be called from Bukkit scheduler
-// Use runLater() for delayed tasks instead
+// NOTE: runTimer() and runAsync() removed due to GraalVM multithreading restrictions
+// JavaScript callbacks cannot be called from Bukkit scheduler threads
 
 console.log("Scheduler example loaded successfully!");

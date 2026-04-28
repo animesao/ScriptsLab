@@ -19,6 +19,12 @@ public interface ScriptEngine {
     CompletableFuture<Void> initialize();
     
     /**
+     * Initializes the script engine synchronously (blocking).
+     * Must be called from the main server thread.
+     */
+    void initializeSync();
+    
+    /**
      * Shuts down the script engine.
      * 
      * @return future that completes when shut down

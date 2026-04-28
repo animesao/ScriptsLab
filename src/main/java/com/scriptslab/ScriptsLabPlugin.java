@@ -245,7 +245,7 @@ public final class ScriptsLabPlugin extends JavaPlugin {
         Path scriptsDir = getDataFolder().toPath().resolve("scripts");
         ScriptAPIImpl scriptAPI = new ScriptAPIImpl(this);
         scriptEngine = new GraalScriptEngine(scriptsDir, scriptAPI);
-        scriptEngine.initialize().join();
+        scriptEngine.initializeSync();
         container.registerSingleton(ScriptEngine.class, scriptEngine);
         getLogger().info("  ✓ Script Engine");
         

@@ -199,21 +199,23 @@ public final class ScriptAPIImpl implements Listener {
     private final ScriptAPIImpl scriptAPIImplListener = this;
     
     // === Scheduler ===
+    // NOTE: Disabled due to GraalVM JS multithreading restrictions
+    // JS callbacks cannot be invoked from Bukkit scheduler
     
     public void runLater(Runnable task, long ticks) {
-        plugin.getTaskScheduler().runTaskLater(
-                task, ticks, java.util.concurrent.TimeUnit.MILLISECONDS);
+        // Disabled - cannot schedule JS callbacks from different thread
+        plugin.getLogger().warning("Scheduler.runLater() disabled - GraalVM JS restrictions");
     }
     
     public void runAsync(Runnable task) {
-        plugin.getTaskScheduler().runTaskAsync(task);
+        // Disabled
+        plugin.getLogger().warning("Scheduler.runAsync() disabled - GraalVM JS restrictions");
     }
     
     public int runTimer(Runnable task, long delayTicks, long periodTicks) {
-        return plugin.getTaskScheduler().runTaskTimer(
-                task, delayTicks * 50, periodTicks * 50, 
-                java.util.concurrent.TimeUnit.MILLISECONDS
-        ).getTaskId();
+        // Disabled
+        plugin.getLogger().warning("Scheduler.runTimer() disabled - GraalVM JS restrictions");
+        return -1;
     }
     
     // === Logging ===
