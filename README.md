@@ -366,9 +366,9 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ScriptsLab/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/ScriptsLab/discussions)
-- **Wiki**: [Documentation Wiki](https://github.com/yourusername/ScriptsLab/wiki)
+- **Issues**: [GitHub Issues](https://github.com/animesao/ScriptsLab/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/animesao/ScriptsLab/discussions)
+- **Wiki**: [Documentation Wiki](https://github.com/animesao/ScriptsLab/wiki)
 
 ---
 
