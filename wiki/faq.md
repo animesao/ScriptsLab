@@ -339,3 +339,347 @@ scripts:
 | [Script API](script-api.md) | Полный API |
 | [Примеры](examples/) | Готовые примеры |
 | [Troubleshooting](troubleshooting.md) | Решение проблем |
+
+---
+
+# ❓ Frequently Asked Questions (English)
+
+Answers to the most popular questions about ScriptsLab.
+
+---
+
+## General Questions
+
+### What is ScriptsLab?
+
+ScriptsLab is a plugin framework for Paper/Spigot servers that allows you to create custom content using JavaScript. Powered by GraalVM engine.
+
+### Which Minecraft versions are supported?
+
+| Version | Status |
+|--------|--------|
+| 1.20.4 | ✅ Supported |
+| 1.21+ | ✅ Supported |
+| 1.19 and below | ❌ Not supported |
+
+### Which server types are supported?
+
+- **Paper** (recommended)
+- **Spigot**
+- **Pufferfish**
+
+> **Important**: CraftBukkit is NOT supported!
+
+---
+
+## Installation
+
+### What are the system requirements?
+
+| Requirement | Minimum | Recommended |
+|-------------|---------|---------------|
+| Java | 17 | 17 LTS |
+| RAM | 2GB | 4GB+ |
+| CPU | 1 core | 2+ cores |
+
+### How to install the plugin?
+
+1. Download `ScriptsLab-1.0.0.jar`
+2. Place in `plugins/` folder
+3. Restart server
+4. Done!
+
+### Do I need to rebuild from source?
+
+No, the ready JAR already includes GraalVM. Just download and use.
+
+---
+
+## Scripts
+
+### Where are scripts stored?
+
+```
+plugins/ScriptsLab/scripts/
+├── hello.js
+├── examples/
+└── ...
+```
+
+### How to create your first script?
+
+1. Create file in `scripts/` folder
+2. Write JavaScript code
+3. Execute `/script reload`
+4. Use the command!
+
+**Example**:
+```javascript
+Commands.register('hello', function(sender, args) {
+    sender.sendMessage('§aHello!');
+});
+```
+
+### How to reload scripts?
+
+```
+/script reload
+```
+
+### Is auto-reload supported?
+
+Yes! Enable in `config.yml`:
+```yaml
+scripts:
+  auto-reload: true
+```
+
+### What are script limitations?
+
+| Limitation | Value |
+|-------------|----------|
+| Timeout | 5 seconds (configurable) |
+| Memory | 128MB (configurable) |
+| Sandbox | Restricted access |
+
+---
+
+## API
+
+### Which API objects are available?
+
+| Object | Description |
+|--------|---------|
+| `Console` | Logging |
+| `Commands` | Commands |
+| `Events` | Events |
+| `Scheduler` | Tasks |
+| `Players` | Players |
+| `Server` | Server |
+| `World` | Worlds |
+| `Items` | Items |
+| `Storage` | Storage |
+
+### Can I use Java classes?
+
+Yes! ScriptsLab allows using Java:
+```javascript
+var Material = Java.type('org.bukkit.Material');
+var ItemStack = Java.type('org.bukkit.inventory.ItemStack');
+```
+
+---
+
+## Commands
+
+### How to register a command?
+
+```javascript
+Commands.register('name', function(sender, args) {
+    // code
+}, 'permission');
+```
+
+### How to check if sender is player?
+
+```javascript
+if (!sender.isPlayer()) {
+    sender.sendMessage('§cOnly for players!');
+    return;
+}
+```
+
+---
+
+## Events
+
+### How to handle an event?
+
+```javascript
+Events.on('PlayerJoinEvent', function(event) {
+    var player = event.getPlayer();
+    player.sendMessage('§aWelcome!');
+});
+```
+
+### Which events are available?
+
+- `PlayerJoinEvent` - join
+- `PlayerQuitEvent` - quit
+- `PlayerChatEvent` - chat
+- `PlayerDeathEvent` - death
+- `EntityDamageByEntityEvent` - attack
+- And many others...
+
+---
+
+## Items
+
+### How to create a custom item?
+
+```javascript
+var item = new ItemStack(Material.DIAMOND_SWORD);
+var meta = item.getItemMeta();
+meta.setDisplayName('§cMy Sword');
+item.setItemMeta(meta);
+player.getInventory().addItem(item);
+```
+
+---
+
+## Storage
+
+### How to save data?
+
+```javascript
+Storage.save('key', value);
+```
+
+### How to load data?
+
+```javascript
+Storage.load('key').then(function(value) {
+    Console.log(value);
+});
+```
+
+---
+
+## Modules
+
+### How to create a module?
+
+1. Create folder `plugins/ScriptsLab/modules/mymodule/`
+2. Create `module.yml`
+3. Add to `config.yml`
+
+### How to enable/disable a module?
+
+```
+/module enable <name>
+/module disable <name>
+```
+
+---
+
+## Security
+
+### What is sandbox?
+
+Sandbox restricts scripts' access to dangerous operations. Enable in `config.yml`:
+
+```yaml
+security:
+  sandbox-enabled: true
+```
+
+### Is ScriptsLab safe to use?
+
+Yes, with proper configuration:
+- Enable `sandbox-enabled` on public servers
+- Restrict player permissions
+- Regularly update the plugin
+
+---
+
+## Performance
+
+### Plugin causes lag?
+
+Check:
+1. No infinite loops in scripts
+2. Enough memory allocated
+3. Tasks not running too frequently
+
+### How to optimize?
+
+- Use `Scheduler.runTimer` instead of loops
+- Don't execute heavy operations on main thread
+- Limit event listener count
+
+---
+
+## Errors
+
+### "Unknown command"
+
+Execute `/script list` to check script loading.
+
+### "You don't have permission"
+
+Check permissions in `permissions.yml`.
+
+### "Script execution timeout"
+
+Increase timeout in `config.yml`:
+```yaml
+scripts:
+  timeout: 10000
+```
+
+---
+
+## Updates
+
+### How to update the plugin?
+
+1. Stop the server
+2. Replace JAR file
+3. Start the server
+
+### Do I need a backup?
+
+Yes, make a backup before updating:
+- `plugins/ScriptsLab/` folder
+- Database (if using SQLite)
+
+---
+
+## Development
+
+### How to become a beta tester?
+
+Follow GitHub Releases.
+
+### How to suggest a feature?
+
+Create an Issue on GitHub.
+
+---
+
+## Support
+
+### Where to get help?
+
+- **GitHub Issues**: Report a bug
+- **GitHub Discussions**: Ask a question
+
+### How to report a bug?
+
+Specify:
+1. ScriptsLab version
+2. Server version
+3. Java version
+4. Error log
+5. Reproduction steps
+
+---
+
+## Glossary
+
+| Term | Definition |
+|--------|-------------|
+| GraalVM | JavaScript engine |
+| Sandbox | Security sandbox |
+| Hot-reload | Hot reload |
+| API | Programming interface |
+
+---
+
+## Next Steps
+
+| Section | Description |
+|--------|----------|
+| [Script API](script-api.md) | Full API |
+| [Examples](examples/) | Ready-made examples |
+| [Troubleshooting](troubleshooting.md) | Problem solving |

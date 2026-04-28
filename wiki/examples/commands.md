@@ -545,3 +545,541 @@ Console.log('Команда /speed зарегистрирована');
 | [События](events.md) | Обработка событий |
 | [Scheduler](scheduler.md) | Планирование задач |
 | [Предметы](items.md) | Кастомные предметы |
+
+---
+
+# 💡 Command Examples (English)
+
+Ready-to-use command examples for ScriptsLab.
+
+---
+
+## Simple Hello Command
+
+Creates `/hello` command that sends a welcome message.
+
+```javascript
+/**
+ * Command /hello - Send greeting
+ */
+Commands.register('hello', function(sender, args) {
+    sender.sendMessage('§aHello, ' + sender.getName() + '!');
+    sender.sendMessage('§7Welcome to the server!');
+});
+
+Console.log('Command /hello registered');
+```
+
+---
+
+## Heal Command
+
+Restores health, hunger, and removes effects.
+
+```javascript
+/**
+ * Command /heal - Restore health
+ */
+Commands.register('heal', function(sender, args) {
+    // Check: players only
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    
+    // Restore health
+    player.setHealth(player.getMaxHealth());
+    
+    // Restore hunger
+    player.setFoodLevel(20);
+    player.setSaturation(20.0);
+    
+    // Remove effects
+    player.getActivePotionEffects().forEach(function(effect) {
+        player.removePotionEffect(effect.getType());
+    });
+    
+    player.sendMessage('§a✓ You have been fully healed!');
+    Console.log(player.getName() + ' used /heal');
+    
+}, 'scriptslab.heal');
+
+Console.log('Command /heal registered');
+```
+
+---
+
+## Fly Command
+
+Toggles flight for player.
+
+```javascript
+/**
+ * Command /fly - Toggle flight
+ */
+Commands.register('fly', function(sender, args) {
+    // Check: players only
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    var currentFlight = player.getAllowFlight();
+    player.setAllowFlight(!currentFlight);
+    
+    var msg = player.getAllowFlight() ? '§a✓ Flight enabled!' : '§c✗ Flight disabled!';
+    player.sendMessage(msg);
+    
+    Console.log(player.getName() + ' toggled flight: ' + player.getAllowFlight());
+}, 'scriptslab.fly');
+
+Console.log('Command /fly registered');
+```
+
+---
+
+## Spawn Teleport Command
+
+Teleports player to world spawn.
+
+```javascript
+/**
+ * Command /spawn - Teleport to spawn
+ */
+Commands.register('spawn', function(sender, args) {
+    // Check: players only
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    var world = player.getWorld();
+    
+    // Get spawn coordinates
+    var spawn = world.getSpawnLocation();
+    
+    player.teleport(spawn);
+    player.sendMessage('§aYou have been teleported to spawn!');
+    
+    Console.log(player.getName() + ' teleported to spawn');
+});
+
+Console.log('Command /spawn registered');
+```
+
+---
+
+## Command with Arguments
+
+Example command with arguments.
+
+```javascript
+/**
+ * Command /warp <name> - Teleport to warp
+ */
+Commands.register('warp', function(sender, args) {
+    // Check arguments
+    if (args.length === 0) {
+        sender.sendMessage('§cUsage: /warp <name>');
+        sender.sendMessage('§7Available warps: spawn, shop, arena');
+        return;
+    }
+    
+    // Check: players only
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var warpName = args[0].toLowerCase();
+    var player = sender;
+    
+    // Warp coordinates
+    var warps = {
+        'spawn': {x: 0, y: 100, z: 0},
+        'shop': {x: 100, y: 100, z: 0},
+        'arena': {x: -100, y: 100, z: 0}
+    };
+    
+    // Check if warp exists
+    if (!warps[warpName]) {
+        sender.sendMessage('§cWarp not found: ' + warpName);
+        return;
+    }
+    
+    // Teleport
+    var world = player.getWorld();
+    var Location = Java.type('org.bukkit.Location');
+    var location = new Location(
+        world,
+        warps[warpName].x,
+        warps[warpName].y,
+        warps[warpName].z
+    );
+    
+    player.teleport(location);
+    player.sendMessage('§aTeleported to §e' + warpName + '§a!');
+    
+    Console.log(player.getName() + ' teleported to ' + warpName);
+});
+
+Console.log('Command /warp registered');
+```
+
+---
+
+## Give Item Command
+
+Gives player a specific item.
+
+```javascript
+/**
+ * Command /give <item> [amount] - Give item
+ */
+Commands.register('give', function(sender, args) {
+    // Check arguments
+    if (args.length === 0) {
+        sender.sendMessage('§cUsage: /give <item> [amount]');
+        sender.sendMessage('§7Available items: diamond, emerald, book');
+        return;
+    }
+    
+    // Check: players only
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    var itemName = args[0].toLowerCase();
+    var amount = args.length > 1 ? parseInt(args[1]) : 1;
+    
+    // Name mapping
+    var materials = {
+        'diamond': 'DIAMOND',
+        'emerald': 'EMERALD',
+        'gold': 'GOLD_INGOT',
+        'iron': 'IRON_INGOT',
+        'book': 'BOOK',
+        'apple': 'GOLDEN_APPLE',
+        'enchant': 'ENCHANTED_BOOK'
+    };
+    
+    // Check if item exists
+    if (!materials[itemName]) {
+        sender.sendMessage('§cUnknown item: ' + itemName);
+        return;
+    }
+    
+    // Get Material
+    var Material = Java.type('org.bukkit.Material');
+    var ItemStack = Java.type('org.bukkit.inventory.ItemStack');
+    
+    var material = Material.valueOf(materials[itemName]);
+    var item = new ItemStack(material, amount);
+    
+    // Give item
+    player.getInventory().addItem(item);
+    player.sendMessage('§aYou received §e' + amount + 'x ' + itemName);
+    
+    Console.log(player.getName() + ' received ' + itemName + ' x' + amount);
+}, 'scriptslab.give');
+
+Console.log('Command /give registered');
+```
+
+---
+
+## Kill Command
+
+Kills target (self or other player).
+
+```javascript
+/**
+ * Command /kill [player] - Kill player
+ */
+Commands.register('kill', function(sender, args) {
+    var target = sender;
+    
+    // If player specified
+    if (args.length > 0) {
+        // Check permissions
+        if (!sender.hasPermission('scriptslab.kill.others')) {
+            sender.sendMessage('§cNo permission!');
+            return;
+        }
+        
+        var targetName = args[0];
+        target = Players.get(targetName);
+        
+        if (target === null) {
+            sender.sendMessage('§cPlayer not found: ' + targetName);
+            return;
+        }
+    }
+    
+    // Check: target must be player
+    if (!target.isPlayer()) {
+        sender.sendMessage('§cTarget is not a player!');
+        return;
+    }
+    
+    // Kill player
+    target.setHealth(0.0);
+    
+    if (target === sender) {
+        sender.sendMessage('§cYou committed suicide!');
+    } else {
+        sender.sendMessage('§aYou killed §e' + target.getName());
+        target.sendMessage('§cYou were killed by §e' + sender.getName());
+    }
+    
+    Console.log(sender.getName() + ' killed ' + target.getName());
+}, 'scriptslab.kill');
+
+Console.log('Command /kill registered');
+```
+
+---
+
+## Heal Other Command
+
+Heal another player.
+
+```javascript
+/**
+ * Command /healother <player> - Heal another player
+ */
+Commands.register('healother', function(sender, args) {
+    // Check arguments
+    if (args.length === 0) {
+        sender.sendMessage('§cUsage: /healother <player>');
+        return;
+    }
+    
+    // Check permissions
+    if (!sender.hasPermission('scriptslab.healother')) {
+        sender.sendMessage('§cNo permission!');
+        return;
+    }
+    
+    var targetName = args[0];
+    var target = Players.get(targetName);
+    
+    if (target === null) {
+        sender.sendMessage('§cPlayer not found: ' + targetName);
+        return;
+    }
+    
+    // Heal
+    target.setHealth(target.getMaxHealth());
+    target.setFoodLevel(20);
+    target.setSaturation(20.0);
+    
+    target.getActivePotionEffects().forEach(function(effect) {
+        target.removePotionEffect(effect.getType());
+    });
+    
+    sender.sendMessage('§aYou healed §e' + targetName);
+    target.sendMessage('§aYou were healed by §e' + sender.getName());
+    
+    Console.log(sender.getName() + ' healed ' + targetName);
+}, 'scriptslab.healother');
+
+Console.log('Command /healother registered');
+```
+
+---
+
+## Time Command
+
+Sets time of day.
+
+```javascript
+/**
+ * Command /time set <day|night> - Set time
+ */
+Commands.register('time', function(sender, args) {
+    // Check arguments
+    if (args.length === 0 || args[0] !== 'set') {
+        sender.sendMessage('§cUsage: /time set <day|night>');
+        return;
+    }
+    
+    if (args.length < 2) {
+        sender.sendMessage('§cUsage: /time set <day|night>');
+        return;
+    }
+    
+    var timeType = args[1].toLowerCase();
+    var world = sender instanceof org.bukkit.entity.Player 
+        ? sender.getWorld() 
+        : org.bukkit.Bukkit.getWorlds().get(0);
+    
+    // Set time
+    var time = timeType === 'day' ? 1000 : 13000;
+    world.setTime(time);
+    
+    var msg = timeType === 'day' ? '§eDay' : '§8Night';
+    Server.broadcast('§aTime set to: ' + msg);
+    
+    Console.log('Time changed to ' + timeType);
+});
+
+Console.log('Command /time registered');
+```
+
+---
+
+## Weather Command
+
+Sets weather.
+
+```javascript
+/**
+ * Command /weather <sun|rain|storm> - Set weather
+ */
+Commands.register('weather', function(sender, args) {
+    // Check arguments
+    if (args.length === 0) {
+        sender.sendMessage('§cUsage: /weather <sun|rain|storm>');
+        return;
+    }
+    
+    var weatherType = args[0].toLowerCase();
+    var world;
+    
+    if (sender.isPlayer()) {
+        world = sender.getWorld();
+    } else {
+        world = org.bukkit.Bukkit.getWorlds().get(0);
+    }
+    
+    // Set weather
+    if (weatherType === 'sun') {
+        world.setStorm(false);
+        world.setThundering(false);
+        Server.broadcast('§eWeather: Clear');
+    } else if (weatherType === 'rain') {
+        world.setStorm(true);
+        world.setThundering(false);
+        Server.broadcast('§eWeather: Rain');
+    } else if (weatherType === 'storm') {
+        world.setStorm(true);
+        world.setThundering(true);
+        Server.broadcast('§eWeather: Storm');
+    } else {
+        sender.sendMessage('§cUnknown weather: ' + weatherType);
+        sender.sendMessage('§cAvailable: sun, rain, storm');
+        return;
+    }
+    
+    Console.log('Weather changed to ' + weatherType);
+});
+
+Console.log('Command /weather registered');
+```
+
+---
+
+## Clear Inventory Command
+
+Clears player inventory.
+
+```javascript
+/**
+ * Command /clear - Clear inventory
+ */
+Commands.register('clear', function(sender, args) {
+    // Check: players only
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    
+    // Clear inventory
+    player.getInventory().clear();
+    player.getEquipment().clear();
+    
+    player.sendMessage('§aInventory cleared!');
+    Console.log(player.getName() + ' cleared inventory');
+});
+
+Console.log('Command /clear registered');
+```
+
+---
+
+## Speed Command
+
+Changes movement speed.
+
+```javascript
+/**
+ * Command /speed <number> - Change speed
+ */
+Commands.register('speed', function(sender, args) {
+    // Check: players only
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    // Check arguments
+    if (args.length === 0) {
+        sender.sendMessage('§cUsage: /speed <1-10>');
+        return;
+    }
+    
+    var speed = parseFloat(args[0]);
+    
+    // Check range
+    if (speed < 1 || speed > 10) {
+        sender.sendMessage('§cSpeed must be between 1 and 10!');
+        return;
+    }
+    
+    var player = sender;
+    
+    // Set speed (player can be in Creative or Survival)
+    // Note: this is a simplified example
+    var Attribute = Java.type('org.bukkit.attribute.Attribute');
+    var AttributeModifier = Java.type('org.bukkit.attribute.AttributeModifier');
+    var UUID = Java.type('java.util.UUID');
+    
+    player.sendMessage('§aSpeed set to §e' + speed);
+    Console.log(player.getName() + ' changed speed to ' + speed);
+});
+
+Console.log('Command /speed registered');
+```
+
+---
+
+## Command Summary
+
+### Key + Command = Ready!
+
+| Script | File | Name |
+|--------|------|----------|
+| Healing | `heal_command.js` | /heal |
+| Flight | `fly_command.js` | /fly |
+| Teleport | `spawn_command.js` | /spawn |
+| Warps | `warp_command.js` | /warp |
+| Items | `give_command.js` | /give |
+
+---
+
+## Next Steps
+
+| Step | Description |
+|-----|----------|
+| [Events](events.md) | Event handling |
+| [Scheduler](scheduler.md) | Task scheduling |
+| [Items](items.md) | Custom items |

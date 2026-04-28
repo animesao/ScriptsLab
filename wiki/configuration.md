@@ -604,3 +604,612 @@ security:
 | [Команды](commands.md) | Управление плагином |
 | [Права](permissions.md) | Настройка прав доступа |
 | [Script API](script-api.md) | API для скриптов |
+
+---
+
+# ⚙️ ScriptsLab Configuration (English)
+
+Complete guide to configuring ScriptsLab plugin. All `config.yml` parameters are described here.
+
+---
+
+## Configuration File Structure
+
+The `config.yml` file is located at `plugins/ScriptsLab/config.yml`:
+
+```yaml
+# ScriptsLab Configuration
+# Production-grade scriptable plugin framework
+
+# General settings
+general:
+  language: en
+  debug: false
+  auto-save-interval: 5
+
+# Script engine settings
+scripts:
+  enabled: true
+  auto-reload: true
+  timeout: 5000
+  max-memory: 128
+
+# Module settings
+modules:
+  auto-load: true
+  enabled-modules:
+    - demo
+  disabled-modules: []
+
+# Storage settings
+storage:
+  provider: yaml
+  cache-enabled: true
+  cache-size: 1000
+  auto-save: true
+
+# Performance settings
+performance:
+  metrics-enabled: true
+  async-pool-size: 4
+  event-threads: 2
+
+# Security settings
+security:
+  sandbox-enabled: false
+  allowed-packages:
+    - org.bukkit
+    - net.kyori
+    - java.util
+    - java.lang
+  blocked-operations:
+    - file-write
+    - file-delete
+    - system-exec
+    - network-access
+    - reflection
+```
+
+---
+
+## General Settings (general)
+
+### language
+
+**Description**: Plugin message language
+
+**Type**: `string` (en, ru)
+
+**Default**: `en`
+
+**Example**:
+```yaml
+general:
+  language: ru  # Russian language
+```
+
+| Value | Language |
+|----------|------|
+| `en` | English |
+| `ru` | Russian |
+
+---
+
+### debug
+
+**Description**: Enable debug mode (verbose logging)
+
+**Type**: `boolean`
+
+**Default**: `false`
+
+**Example**:
+```yaml
+general:
+  debug: true  # Enable debugging
+```
+
+| Value | Description |
+|----------|-----------|
+| `false` | Important messages only |
+| `true` | All messages including debug |
+
+---
+
+### auto-save-interval
+
+**Description**: Data auto-save interval (in minutes)
+
+**Type**: `integer` (minutes)
+
+**Default**: `5`
+
+**Example**:
+```yaml
+general:
+  auto-save-interval: 10  # Save every 10 minutes
+```
+
+---
+
+## Script Settings (scripts)
+
+### enabled
+
+**Description**: Enable script engine
+
+**Type**: `boolean`
+
+**Default**: `true`
+
+**Example**:
+```yaml
+scripts:
+  enabled: false  # Disable scripts (not recommended)
+```
+
+---
+
+### auto-reload
+
+**Description**: Auto-reload scripts when file changes
+
+**Type**: `boolean`
+
+**Default**: `true`
+
+**Example**:
+```yaml
+scripts:
+  auto-reload: true  # Reload on change
+```
+
+> **Important**: When `true`, scripts auto-reload on save. Convenient for development but may cause issues on production servers.
+
+---
+
+### timeout
+
+**Description**: Script execution timeout (in milliseconds)
+
+**Type**: `integer` (ms)
+
+**Default**: `5000` (5 seconds)
+
+**Example**:
+```yaml
+scripts:
+  timeout: 10000  # 10 seconds to execute
+```
+
+| Value | Time | Recommendation |
+|----------|-------|-------------|
+| 1000 | 1 sec | Very fast scripts |
+| 5000 | 5 sec | Default |
+| 30000 | 30 sec | Complex operations |
+
+---
+
+### max-memory
+
+**Description**: Maximum memory per script (MB)
+
+**Type**: `integer`
+
+**Default**: `128`
+
+**Example**:
+```yaml
+scripts:
+  max-memory: 256  # 256MB per script
+```
+
+---
+
+## Module Settings (modules)
+
+### auto-load
+
+**Description**: Auto-load modules on startup
+
+**Type**: `boolean`
+
+**Default**: `true`
+
+**Example**:
+```yaml
+modules:
+  auto-load: true
+```
+
+---
+
+### enabled-modules
+
+**Description**: List of modules to load (empty = load all)
+
+**Type**: `list`
+
+**Default**: `[]` (all modules)
+
+**Example**:
+```yaml
+modules:
+  enabled-modules:
+    - demo
+    - economy
+    - customitems
+```
+
+---
+
+### disabled-modules
+
+**Description**: List of modules to disable
+
+**Type**: `list`
+
+**Default**: `[]`
+
+**Example**:
+```yaml
+modules:
+  disabled-modules:
+    - debug
+    - testmodule
+```
+
+---
+
+## Storage Settings (storage)
+
+### provider
+
+**Description**: Data storage type
+
+**Type**: `string` (yaml, json, sqlite)
+
+**Default**: `yaml`
+
+**Example**:
+```yaml
+storage:
+  provider: sqlite  # Use SQLite
+```
+
+| Value | Description |
+|----------|-----------|
+| `yaml` | YAML files (default) |
+| `json` | JSON files |
+| `sqlite` | SQLite database |
+
+---
+
+### cache-enabled
+
+**Description**: Enable data caching
+
+**Type**: `boolean`
+
+**Default**: `true`
+
+**Example**:
+```yaml
+storage:
+  cache-enabled: false  # Disable cache
+```
+
+---
+
+### cache-size
+
+**Description**: Cache size (number of entries)
+
+**Type**: `integer`
+
+**Default**: `1000`
+
+**Example**:
+```yaml
+storage:
+  cache-size: 5000  # Large cache
+```
+
+---
+
+### auto-save
+
+**Description**: Auto-save on server shutdown
+
+**Type**: `boolean`
+
+**Default**: `true`
+
+**Example**:
+```yaml
+storage:
+  auto-save: false
+```
+
+---
+
+## Performance Settings (performance)
+
+### metrics-enabled
+
+**Description**: Enable performance metrics collection
+
+**Type**: `boolean`
+
+**Default**: `true`
+
+**Example**:
+```yaml
+performance:
+  metrics-enabled: false  # Disable metrics
+```
+
+---
+
+### async-pool-size
+
+**Description**: Async task pool size
+
+**Type**: `integer`
+
+**Default**: `4`
+
+**Example**:
+```yaml
+performance:
+  async-pool-size: 8  # More async tasks
+```
+
+---
+
+### event-threads
+
+**Description**: Number of threads for event processing
+
+**Type**: `integer`
+
+**Default**: `2`
+
+**Example**:
+```yaml
+performance:
+  event-threads: 4  # More event threads
+```
+
+---
+
+## Security Settings (security)
+
+### ⚠️ sandbox-enabled
+
+**Description**: Enable script sandbox
+
+**Type**: `boolean`
+
+**Default**: `false`
+
+**Example**:
+```yaml
+security:
+  sandbox-enabled: true  # Enable protection
+```
+
+| Value | Security Level | Usage |
+|-----------|----------------------|----------------|
+| `false` | Low | Private servers |
+| `true` | High | Public servers |
+
+> **Important**: On public servers, it is strongly recommended to use `sandbox-enabled: true`!
+
+---
+
+### allowed-packages
+
+**Description**: Allowed Java packages in sandbox mode
+
+**Type**: `list`
+
+**Default**:
+```yaml
+allowed-packages:
+  - org.bukkit
+  - net.kyori
+  - java.util
+  - java.lang
+```
+
+**Example**:
+```yaml
+security:
+  allowed-packages:
+    - org.bukkit
+    - org.bukkit.entity
+    - net.kyori
+    - java.util
+    - java.lang
+    - java.util.concurrent
+```
+
+---
+
+### blocked-operations
+
+**Description**: Blocked operations in sandbox
+
+**Type**: `list`
+
+**Default**:
+```yaml
+blocked-operations:
+  - file-write
+  - file-delete
+  - system-exec
+  - network-access
+  - reflection
+```
+
+| Operation | Description |
+|---------|-----------|
+| `file-write` | Write to files |
+| `file-delete` | Delete files |
+| `system-exec` | Execute system commands |
+| `network-access` | Network requests |
+| `reflection` | Java Reflection API |
+
+---
+
+## Configuration Examples
+
+### Private Server Configuration
+
+```yaml
+general:
+  language: ru
+  debug: false
+  auto-save-interval: 5
+
+scripts:
+  enabled: true
+  auto-reload: true
+  timeout: 10000
+  max-memory: 256
+
+modules:
+  auto-load: true
+  enabled-modules: []
+  disabled-modules: []
+
+storage:
+  provider: yaml
+  cache-enabled: true
+  cache-size: 5000
+  auto-save: true
+
+performance:
+  metrics-enabled: true
+  async-pool-size: 4
+  event-threads: 2
+
+security:
+  sandbox-enabled: false
+  allowed-packages:
+    - org.bukkit
+    - net.kyori
+    - java.util
+    - java.lang
+  blocked-operations: []
+```
+
+### Public Server Configuration
+
+```yaml
+general:
+  language: en
+  debug: false
+  auto-save-interval: 3
+
+scripts:
+  enabled: true
+  auto-reload: false
+  timeout: 5000
+  max-memory: 128
+
+modules:
+  auto-load: true
+  enabled-modules: []
+  disabled-modules: []
+
+storage:
+  provider: yaml
+  cache-enabled: true
+  cache-size: 2000
+  auto-save: true
+
+performance:
+  metrics-enabled: true
+  async-pool-size: 8
+  event-threads: 4
+
+security:
+  sandbox-enabled: true
+  allowed-packages:
+    - org.bukkit
+    - org.bukkit.entity
+    - net.kyori
+    - java.util
+    - java.lang
+  blocked-operations:
+    - file-write
+    - file-delete
+    - system-exec
+    - network-access
+    - reflection
+```
+
+### Development Configuration
+
+```yaml
+general:
+  language: en
+  debug: true
+  auto-save-interval: 1
+
+scripts:
+  enabled: true
+  auto-reload: true
+  timeout: 30000
+  max-memory: 512
+
+modules:
+  auto-load: true
+  enabled-modules:
+    - demo
+  disabled-modules: []
+
+storage:
+  provider: yaml
+  cache-enabled: false
+  cache-size: 100
+  auto-save: true
+
+performance:
+  metrics-enabled: true
+  async-pool-size: 2
+  event-threads: 1
+
+security:
+  sandbox-enabled: false
+  allowed-packages:
+    - org.bukkit
+    - net.kyori
+    - java.util
+    - java.lang
+  blocked-operations: []
+```
+
+---
+
+## Reloading Configuration
+
+After changing `config.yml`, reload the plugin:
+
+```
+/scriptslab reload
+```
+
+Or restart the server.
+
+---
+
+## Next Steps
+
+| Step | Description |
+|-----|----------|
+| [Commands](commands.md) | Plugin management |
+| [Permissions](permissions.md) | Access rights setup |
+| [Script API](script-api.md) | API for scripts |

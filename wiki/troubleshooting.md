@@ -451,3 +451,459 @@ Commands.register('mycommand', function(sender, args) {
 | [FAQ](faq.md) | Часто задаваемые вопросы |
 | [Script API](script-api.md) | Полный API |
 | [Examples](examples/) | Примеры |
+
+---
+
+# 🔧 Troubleshooting (English)
+
+Guide to resolving common ScriptsLab issues.
+
+---
+
+## General Issues
+
+### Plugin Not Loading
+
+**Symptoms**: Plugin doesn't appear in `/plugins` list
+
+**Causes**:
+1. Wrong server version
+2. Conflict with another plugin
+3. Corrupted JAR file
+
+**Solutions**:
+
+1. **Check server version**
+   ```
+   /version
+   ```
+   Must be Paper 1.20.4+ or Spigot 1.20.4+
+
+2. **Check logs**
+   ```
+   logs/latest.log
+   ```
+   Look for loading errors
+
+3. **Remove other plugins**
+   Disable other plugins and check loading
+
+---
+
+### Error "Java version not supported"
+
+**Symptoms**:
+```
+[ScriptsLab] ERROR: Java 17 required
+```
+
+**Solution**:
+
+```bash
+# Linux - Check Java version
+java -version
+
+# Install Java 17
+sudo apt install openjdk-17-jdk
+```
+
+**Check in startup script**:
+```bash
+#!/bin/bash
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+java -Xmx4G -Xms2G -jar paper.jar --nogui
+```
+
+---
+
+### Error "Plugin does not support this server type"
+
+**Symptoms**:
+```
+[ScriptsLab] ERROR: Plugin requires Paper
+```
+
+**Solution**:
+- Use Paper, Spigot, or Pufferfish
+- CraftBukkit is NOT supported!
+
+---
+
+## Script Issues
+
+### Script Not Loading
+
+**Symptoms**: Command from script doesn't work
+
+**Diagnostics**:
+
+1. **Check script loading**
+   ```
+   /script list
+   ```
+
+2. **Check logs**
+   ```
+   logs/latest.log
+   ```
+   Look for JavaScript errors
+
+3. **Enable debug mode**
+   ```yaml
+   # config.yml
+   general:
+     debug: true
+   ```
+
+**Common Causes**:
+
+| Error | Cause | Solution |
+|--------|---------|--------|
+| `ReferenceError` | Undefined variable | Check variable name |
+| `SyntaxError` | Syntax error | Check brackets and commas |
+| `TypeError` | Wrong type | Check method call |
+
+---
+
+### "timeout" Error During Execution
+
+**Symptoms**:
+```
+[ScriptsLab] ERROR: Script execution timeout
+```
+
+**Solution**:
+
+1. **Increase timeout** in `config.yml`:
+   ```yaml
+   scripts:
+     timeout: 10000  # 10 seconds
+   ```
+
+2. **Optimize script**
+   - Avoid infinite loops
+   - Use asynchronous operations
+
+---
+
+### Script Causes Server Lag
+
+**Symptoms**: Server slows down after loading script
+
+**Solution**:
+
+1. **Check loops**
+   ```javascript
+   // Bad
+   while (true) {
+       // Infinite loop!
+   }
+
+   // Good
+   Scheduler.runTimer(function() {
+       // Code
+   }, 0, 20);
+   ```
+
+2. **Use runLater instead of direct calls**
+   ```javascript
+   // Bad - blocks server
+   heavyFunction();
+
+   // Good - executes asynchronously
+   Scheduler.runLater(function() {
+       heavyFunction();
+   }, 0);
+   ```
+
+3. **Limit execution frequency**
+   ```javascript
+   // Run no more than once per second
+   Scheduler.runTimer(function() {
+       // Code
+   }, 0, 20);
+   ```
+
+---
+
+## Memory Issues
+
+### OutOfMemoryError
+
+**Symptoms**:
+```
+java.lang.OutOfMemoryError: Java heap space
+```
+
+**Solution**:
+
+1. **Increase memory** in startup script:
+   ```bash
+   java -Xmx6G -Xms4G -jar paper.jar --nogui
+   ```
+
+2. **Decrease max-memory** in config.yml:
+   ```yaml
+   scripts:
+     max-memory: 64
+   ```
+
+3. **Check for memory leaks**
+   - Remove event listeners on script unload
+   - Cancel scheduler tasks
+
+---
+
+## Permission Issues
+
+### No Access to Command
+
+**Symptoms**: `You don't have permission to do that!`
+
+**Solution**:
+
+1. **Check permission**
+   ```yaml
+   # In config.yml permissions
+   permissions:
+     scriptslab.use: true
+   ```
+
+2. **Add permission to player**
+   ```yaml
+   # LuckPerms
+   lp user NickName permission set scriptslab.heal true
+   ```
+
+3. **Add permission to group**
+   ```yaml
+   # PermissionsEx
+   groups:
+     player:
+       permissions:
+         - scriptslab.heal
+   ```
+
+---
+
+## Command Issues
+
+### Command Not Found
+
+**Symptoms**: `Unknown command`
+
+**Solution**:
+
+1. **Check command list**
+   ```
+   /script list
+   ```
+
+2. **Reload scripts**
+   ```
+   /script reload
+   ```
+
+3. **Check command name**
+   ```javascript
+   // Registration
+   Commands.register('hello', function(...) {...});
+
+   // Call
+   /hello  // Not /heallo
+   ```
+
+---
+
+### Command Works Only for Players
+
+**Symptoms**: `Only players can use this command`
+
+**Solution**:
+
+```javascript
+Commands.register('mycommand', function(sender, args) {
+    // Player check (already there)
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    // Your code
+});
+```
+
+---
+
+## Event Issues
+
+### Event Not Triggering
+
+**Symptoms**: Event handler doesn't execute
+
+**Diagnostics**:
+
+1. **Check event name**
+   ```javascript
+   // Correct
+   Events.on('PlayerJoinEvent', function(event) {...});
+   
+   // Incorrect
+   Events.on('PlayerJoin', function(event) {...});
+   ```
+
+2. **Check event cancellation**
+   ```javascript
+   event.setCancelled(true);
+   ```
+
+3. **Enable debug**
+   ```javascript
+   Events.on('PlayerJoinEvent', function(event) {
+       Console.debug('Event triggered!');
+   });
+   ```
+
+---
+
+## Item Issues
+
+### Custom Item Not Creating
+
+**Symptoms**: Item get command doesn't work
+
+**Solution**:
+
+1. **Check Material**
+   ```javascript
+   // Correct
+   Material.DIAMOND_SWORD
+   
+   // Incorrect  
+   Material.Diamond_Sword
+   ```
+
+2. **Check ItemMeta**
+   ```javascript
+   var meta = item.getItemMeta();
+   if (meta) {
+       // Code
+   }
+   ```
+
+3. **Check logs**
+   ```javascript
+   Console.log('Creating item...');
+   // Add logging
+   ```
+
+---
+
+## Storage Issues
+
+### Data Not Saving
+
+**Symptoms**: Data lost after restart
+
+**Solution**:
+
+1. **Check save call**
+   ```javascript
+   Storage.save('key', value);  // Save
+   
+   // And load
+   Storage.load('key').then(function(value) {
+       Console.log(value);
+   });
+   ```
+
+2. **Check config.yml**
+   ```yaml
+   storage:
+     provider: yaml
+     auto-save: true
+   ```
+
+---
+
+## GraalVM Issues
+
+### GraalVM Not Loading
+
+**Symptoms**:
+```
+[ScriptsLab] ERROR: Failed to initialize GraalVM
+```
+
+**Solution**:
+
+1. **Check JAR file**
+   - Make sure you're using the correct JAR
+   - Try rebuilding
+
+2. **Check Java**
+   - Need Java 17+
+   - Make sure JAVA_HOME is set correctly
+
+---
+
+## Logging Issues
+
+### How to Get Useful Information
+
+1. **Enable debug mode**:
+   ```yaml
+   general:
+     debug: true
+   ```
+
+2. **Check logs**:
+   ```
+   logs/latest.log
+   ```
+
+3. **Use Console.log**:
+   ```javascript
+   Console.log('Debug: ' + variable);
+   Console.debug('Debug: ' + variable);
+   ```
+
+---
+
+## Diagnostic Commands
+
+| Command | Description |
+|---------|----------|
+| `/scriptslab info` | Plugin information |
+| `/script list` | Script list |
+| `/script reload` | Reload scripts |
+| `/module list` | Module list |
+
+---
+
+## Getting Help
+
+### Where to Find Help
+
+1. **Server logs** - `logs/latest.log`
+2. **GitHub Issues** - report a bug
+3. **Discord** - community
+
+### When Reporting a Bug
+
+Specify:
+- ScriptsLab version
+- Server version (Paper/Spigot)
+- Java version (`java -version`)
+- Error log
+- Reproduction steps
+
+---
+
+## Next Steps
+
+| Step | Description |
+|-----|----------|
+| [FAQ](faq.md) | Frequently asked questions |
+| [Script API](script-api.md) | Full API |
+| [Examples](examples/) | Examples |

@@ -345,3 +345,354 @@ Console.log('=== Меч Молний полностью активирован! 
 | [Script API](../script-api.md) | Полный API |
 | [Модули](../modules.md) | Система модулей |
 | [Тroubleshooting](../troubleshooting.md) | Решение проблем |
+
+---
+
+# 📜 Ready Scripts (English)
+
+Complete ready-to-use scripts for ScriptsLab.
+
+---
+
+## Welcome Message#
+
+Full join/quit message system.
+
+**File**: `plugins/ScriptsLab/scripts/welcome_message.js`
+
+```javascript
+/**
+ * Welcome message on join
+ * Removes vanilla message and shows custom
+ */
+
+API.registerEvent('PlayerJoinEvent', function(event) {
+    var player = event.getPlayer();
+    
+    // Remove vanilla message
+    event.joinMessage(null);
+    
+    // Send custom welcome
+    var Bukkit = Java.type('org.bukkit.Bukkit');
+    
+    player.sendMessage('§8§m                                                  ');
+    player.sendMessage('');
+    player.sendMessage('  §6§l⚡ Welcome! ⚡');
+    player.sendMessage('');
+    player.sendMessage('  §7Hello, §e' + player.getName() + '§7!');
+    player.sendMessage('  §7Online: §a' + Bukkit.getOnlinePlayers().size() + ' §7players');
+    player.sendMessage('');
+    player.sendMessage('  §7Use §e/help §7for help');
+    player.sendMessage('');
+    player.sendMessage('§8§m                                                  ');
+    
+    // Message to others
+    Bukkit.getOnlinePlayers().forEach(function(p) {
+        if (p.getName() !== player.getName()) {
+            p.sendMessage('§8[§a+§8] §7' + player.getName() + ' §a joined the server');
+        }
+    });
+    
+    Console.log(player.getName() + ' joined the server');
+});
+
+// Custom quit message
+API.registerEvent('PlayerQuitEvent', function(event) {
+    var player = event.getPlayer();
+    
+    // Remove vanilla message
+    event.quitMessage(null);
+    
+    // Send custom message to all
+    var Bukkit = Java.type('org.bukkit.Bukkit');
+    Bukkit.getOnlinePlayers().forEach(function(p) {
+        if (p.getName() !== player.getName()) {
+            p.sendMessage('§8[§c-§8] §7' + player.getName() + ' §c left the server');
+        }
+    });
+    
+    Console.log(player.getName() + ' left the server');
+});
+
+Console.log('Welcome message activated');
+```
+
+---
+
+## Heal System#
+
+Command `/heal` to restore health.
+
+**File**: `plugins/ScriptsLab/scripts/heal_command.js`
+
+```javascript
+/**
+ * Command /heal - Restore health
+ */
+
+Commands.register('heal', function(sender, args) {
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    
+    // Restore health
+    player.setHealth(player.getMaxHealth());
+    
+    // Restore hunger
+    player.setFoodLevel(20);
+    player.setSaturation(20.0);
+    
+    // Remove effects
+    player.getActivePotionEffects().forEach(function(effect) {
+        player.removePotionEffect(effect.getType());
+    });
+    
+    player.sendMessage('§a✓ You have been fully healed!');
+    Console.log(player.getName() + ' used /heal');
+    
+}, 'scriptslab.heal');
+
+Console.log('Command /heal registered');
+```
+
+---
+
+## Flight System#
+
+Command `/fly` to toggle flight.
+
+**File**: `plugins/ScriptsLab/scripts/fly_command.js`
+
+```javascript
+/**
+ * Command /fly - Toggle flight
+ */
+
+Commands.register('fly', function(sender, args) {
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    var currentFlight = player.getAllowFlight();
+    player.setAllowFlight(!currentFlight);
+    
+    var msg = player.getAllowFlight() ? '§a✓ Flight enabled!' : '§c✗ Flight disabled!';
+    player.sendMessage(msg);
+    
+    Console.log(player.getName() + ' toggled flight: ' + player.getAllowFlight());
+}, 'scriptslab.fly');
+
+Console.log('Command /fly registered');
+```
+
+---
+
+## Auto Broadcast#
+
+Regular announcements for players.
+
+**File**: `plugins/ScriptsLab/scripts/auto_broadcast.js`
+
+```javascript
+/**
+ * Auto broadcasts
+ */
+
+var messages = [
+    '§6[Broadcast] §eDon\'t forget to vote for the server!',
+    '§6[Broadcast] §eJoin our Discord!',
+    '§6[Broadcast] §eUse §a/fly §e for flight!',
+    '§6[Broadcast] §eUse §a/heal §e to heal!'
+];
+
+var currentIndex = 0;
+
+// Send message every 5 minutes
+Scheduler.runTimer(function() {
+    Server.broadcast(messages[currentIndex]);
+    currentIndex = (currentIndex + 1) % messages.length;
+}, 100, 6000); // 100 tick delay, 6000 ticks = 5 minutes
+
+Console.log('Auto broadcasts started');
+```
+
+---
+
+## Lightning Sword#
+
+Complex custom item with multiple abilities.
+
+**File**: `plugins/ScriptsLab/scripts/custom_sword.js`
+
+```javascript
+/**
+ * ⚔️ LIGHTNING SWORD ⚔️
+ * 
+ * Features:
+ * - Strikes lightning on hit
+ * - +10 damage (attribute)
+ * - +20% attack speed
+ * - Gives Strength II when held
+ * - Glows (enchant glow)
+ * - Unbreakable
+ */
+
+var Material = Java.type('org.bukkit.Material');
+var ItemStack = Java.type('org.bukkit.inventory.ItemStack');
+var Enchantment = Java.type('org.bukkit.enchantments.Enchantment');
+var ItemFlag = Java.type('org.bukkit.inventory.ItemFlag');
+var ArrayList = Java.type('java.util.ArrayList');
+
+Console.log('=== Initializing Lightning Sword ===');
+
+// Command to get sword
+Commands.register('getlightningsword', function(sender, args) {
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cThis command is only for players!');
+        return;
+    }
+    
+    var player = org.bukkit.Bukkit.getPlayer(sender.getName());
+    if (!player) return;
+    
+    var sword = new ItemStack(Material.DIAMOND_SWORD);
+    var meta = sword.getItemMeta();
+    
+    if (meta) {
+        meta.setDisplayName('§6§l⚡ LIGHTNING SWORD ⚡');
+        
+        var lore = new ArrayList();
+        lore.add('§7');
+        lore.add('§e▸ Abilities:');
+        lore.add('§7  • Strikes lightning on hit');
+        lore.add('§7  • Gives §cStrength II§7 when held');
+        lore.add('§7  • Bonus damage: §c+5 ❤');
+        lore.add('§7');
+        lore.add('§e▸ Stats:');
+        lore.add('§7  • Damage: §c+10 ❤');
+        lore.add('§7  • Attack speed: §a+20%');
+        lore.add('§7  • Durability: §6Unbreakable');
+        lore.add('§7');
+        lore.add('§6§l✦ LEGENDARY ITEM ✦');
+        meta.setLore(lore);
+        
+        meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.addEnchant(Enchantment.LUCK_OF_THE_SEA, 1, true);
+        
+        API.addAttribute(meta, 'GENERIC_ATTACK_DAMAGE', 'lightning_sword_damage', 10.0, 'ADD_NUMBER', 'HAND');
+        API.addAttribute(meta, 'GENERIC_ATTACK_SPEED', 'lightning_sword_speed', 0.8, 'ADD_NUMBER', 'HAND');
+        
+        sword.setItemMeta(meta);
+    }
+    
+    player.getInventory().addItem(sword);
+    player.sendMessage('§6§l⚡ §aYou received §6§lLIGHTNING SWORD§a!');
+    player.sendMessage('§7Hit a mob to see its power...');
+    
+}, 'scriptslab.getlightningsword');
+
+Console.log('✓ Command /getlightningsword registered');
+
+// === ABILITY 1: Lightning on hit ===
+API.registerEvent('EntityDamageByEntityEvent', function(event) {
+    var Player = Java.type('org.bukkit.entity.Player');
+    if (!(event.getDamager() instanceof Player)) return;
+    
+    var attacker = event.getDamager();
+    var victim = event.getEntity();
+    var item = attacker.getInventory().getItemInMainHand();
+    
+    if (!item || item.getType() !== Material.DIAMOND_SWORD) return;
+    
+    var meta = item.getItemMeta();
+    if (!meta || !meta.hasDisplayName()) return;
+    
+    var displayName = meta.getDisplayName();
+    if (displayName.indexOf('LIGHTNING SWORD') === -1) return;
+    
+    API.strikeLightningSync(victim.getLocation());
+    event.setDamage(event.getDamage() + 5.0);
+    
+    attacker.sendMessage('§6⚡ §eLightning strikes the enemy!');
+    
+    Console.log(attacker.getName() + ' used Lightning Sword');
+});
+
+Console.log('✓ Ability "Lightning Strike" activated');
+
+// === ABILITY 2: Strength when held ===
+API.registerEvent('PlayerItemHeldEvent', function(event) {
+    var player = event.getPlayer();
+    var newSlot = event.getNewSlot();
+    var item = player.getInventory().getItem(newSlot);
+    
+    if (item && item.getType() === Material.DIAMOND_SWORD) {
+        var meta = item.getItemMeta();
+        if (meta && meta.hasDisplayName() && meta.getDisplayName().indexOf('LIGHTNING SWORD') !== -1) {
+            var PotionEffectType = Java.type('org.bukkit.potion.PotionEffectType');
+            API.addPotionEffectSync(player, PotionEffectType.STRENGTH, 999999, 1, false, false);
+            player.sendMessage('§6⚡ §eYou feel the power of lightning!');
+        }
+    }
+    
+    var oldSlot = event.getPreviousSlot();
+    var oldItem = player.getInventory().getItem(oldSlot);
+    if (oldItem && oldItem.getType() === Material.DIAMOND_SWORD) {
+        var oldMeta = oldItem.getItemMeta();
+        if (oldMeta && oldMeta.hasDisplayName() && oldMeta.getDisplayName().indexOf('LIGHTNING SWORD') !== -1) {
+            var PotionEffectType = Java.type('org.bukkit.potion.PotionEffectType');
+            API.removePotionEffectSync(player, PotionEffectType.STRENGTH);
+            player.sendMessage('§7Lightning power leaves you...');
+        }
+    }
+});
+
+Console.log('✓ Ability "Strength Effect" activated');
+Console.log('=== Lightning Sword fully activated! ===');
+```
+
+---
+
+## Quick Setup Guide#
+
+### Step 1: Create Scripts Folder#
+
+Create `plugins/ScriptsLab/scripts/` folder if it doesn't exist.
+
+### Step 2: Copy Script#
+
+Copy script code into a new `.js` file in scripts folder.
+
+### Step 3: Reload#
+
+Execute `/script reload` to load the script.
+
+---
+
+## Ready Scripts Table#
+
+| Script | File | Command | Description |
+|--------|------|---------|-----------|
+| Welcome | welcome_message.js | Automatic | Join/quit |
+| Heal | heal_command.js | /heal | Restore HP |
+| Flight | fly_command.js | /fly | Toggle flight |
+| Broadcasts | auto_broadcast.js | Automatic | Announcements |
+| Sword | custom_sword.js | /getlightningsword | Legendary sword |
+
+---
+
+## Further Steps#
+
+| Section | Description |
+|--------|-----------|
+| [Script API](../script-api.md) | Full API |
+| [Modules](../modules.md) | Module system |
+| [Troubleshooting](../troubleshooting.md) | Problem solving |

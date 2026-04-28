@@ -155,3 +155,163 @@ ScriptsLab распространяется под лицензией **MIT** - 
 **Сделано с ❤️ для Minecraft сообщества**
 
 ⭐ Поставьте звёздочку на GitHub, если плагин вам полезен!
+
+---
+
+# ⚡ ScriptsLab Wiki (English)
+
+Welcome to the complete documentation for ScriptsLab plugin!
+
+## Who is this documentation for?
+
+This Wiki is written for everyone - from beginners who are new to Minecraft server plugins, to experienced developers. Here you will find:
+
+- 📥 **Installation** - Step-by-step installation guide
+- ⚙️ **Configuration** - Plugin configuration
+- 📝 **API** - Complete JavaScript API reference
+- 💡 **Examples** - Ready-to-use scripts with explanations
+- 🔧 **Troubleshooting** - FAQ and common issues
+
+---
+
+## Quick Links
+
+| Section | Description |
+|--------|----------|
+| [Installation](installation.md) | How to install the plugin |
+| [Configuration](configuration.md) | config.yml setup |
+| [Commands](commands.md) | Server commands |
+| [Permissions](permissions.md) | Permission system |
+| [Script API](script-api.md) | JavaScript API reference |
+| [Modules](modules.md) | Module system |
+| [Examples](examples/) | Script examples |
+| [FAQ](faq.md) | Frequently asked questions |
+
+---
+
+## What is ScriptsLab?
+
+ScriptsLab is a powerful plugin framework for Minecraft servers (Paper/Spigot) that allows you to create custom gameplay content using **JavaScript**.
+
+### Why ScriptsLab?
+
+| Feature | Description |
+|------------|-----------|
+| 🚀 **Hot-Reload** | Reload scripts without server restart |
+| 🎯 **Modularity** | Organize code into reusable modules |
+| ⚡ **Performance** | Powered by GraalVM JavaScript engine |
+| 🔒 **Security** | Sandbox for server protection |
+| 🎨 **Rich API** | Commands, events, items, storage, scheduler |
+| 🛠️ **Developer Friendly** | Modern JavaScript with IDE support |
+
+### Core Features
+
+- **Command System** - Register custom commands with permissions
+- **Event Handling** - Listen to any Bukkit/Paper events
+- **Custom Items** - Create items with abilities and attributes
+- **Storage** - YAML-based persistent data storage
+- **Task Scheduler** - Sync/async task scheduling
+- **Metrics Collection** - Built-in performance monitoring
+- **Module System** - Hot-loadable plugin modules
+
+---
+
+## Requirements
+
+| Requirement | Version |
+|-------------|--------|
+| Minecraft Server | Paper 1.20.4+ (or compatible Spigot fork) |
+| Java | 17 or higher |
+| Minimum Memory | 2GB RAM |
+
+---
+
+## Quick Start
+
+### 1. Install the Plugin
+
+Download `ScriptsLab-1.0.0.jar` and place it in your server's `plugins/` folder.
+
+### 2. Create Your First Script
+
+Create `plugins/ScriptsLab/scripts/hello.js`:
+
+```javascript
+Commands.register('hello', function(sender, args) {
+    sender.sendMessage('§aHello, ' + sender.getName() + '!');
+}, 'scriptslab.hello');
+
+Console.log('Hello command registered!');
+```
+
+### 3. Use the Command
+
+In-game, type `/hello` - you'll get a welcome message!
+
+---
+
+## Plugin File Structure
+
+```
+plugins/ScriptsLab/
+├── config.yml          # Main configuration
+├── messages.yml      # Plugin messages
+├── scripts/         # Your JavaScript scripts
+│   ├── hello.js
+│   └── examples/
+│       └── ...
+├── modules/         # Plugin modules
+│   └── demo/
+│       └── module.yml
+└── storage/        # Saved data (YAML)
+```
+
+---
+
+## Color Code Translation
+
+ScriptsLab supports both legacy (`&`) and modern (MiniMessage) color codes:
+
+| Code | Color | Example |
+|-----|------|-------|
+| &0 | Black | §0text |
+| &1 | Dark Blue | §1text |
+| &2 | Dark Green | §2text |
+| &3 | Dark Aqua | §3text |
+| &4 | Dark Red | §4text |
+| &5 | Dark Purple | §5text |
+| &6 | Gold | §6text |
+| &7 | Gray | §7text |
+| &8 | Dark Gray | §8text |
+| &9 | Blue | §9text |
+| &a | Green | §atext |
+| &b | Aqua | §btext |
+| &c | Red | §ctext |
+| &d | Light Purple | §dtext |
+| &e | Yellow | §etext |
+| &f | White | §ftext |
+| &l | Bold | §ltext |
+| &o | Italic | §otext |
+| &n | Underlined | §ntext |
+| &m | Strikethrough | §mtext |
+| &k | Magic | §ktext |
+
+---
+
+## Support
+
+- **GitHub Issues**: Report a bug
+- **GitHub Discussions**: Ask a question
+- **Discord**: Join the community
+
+---
+
+## License
+
+ScriptsLab is distributed under the **MIT** license - see [LICENSE](../../LICENSE) for details.
+
+---
+
+**Made with ❤️ for the Minecraft community**
+
+⭐ Star us on GitHub if you find the plugin useful!

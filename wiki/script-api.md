@@ -888,3 +888,896 @@ if (player !== null) {
 | [Примеры](examples/) | Готовые примеры скриптов |
 | [Модули](modules.md) | Система модулей |
 | [Безопасность](configuration.md#security) | Настройка безопасности |
+
+---
+
+# 📜 Script API (English)
+
+Complete reference for ScriptsLab JavaScript API. All available objects and methods for creating scripts are described here.
+
+---
+
+## Global Objects
+
+When a script starts, the following global objects are available:
+
+| Object | Description |
+|--------|---------|
+| `Console` | Log to server console |
+| `Commands` | Register commands |
+| `Events` | Handle events |
+| `Scheduler` | Task scheduling |
+| `Players` | Player management |
+| `Server` | Server management |
+| `World` | World management |
+| `Items` | Create items |
+| `Storage` | Save data |
+| `API` | Extended API |
+
+---
+
+## Console - Logging
+
+Output messages to server console.
+
+### Methods
+
+```javascript
+// Info message
+Console.log('Message');
+
+// Warning
+Console.warn('Warning');
+
+// Error
+Console.error('Error');
+
+// Debug message (only when debug: true)
+Console.debug('Debug');
+```
+
+### Example
+
+```javascript
+Console.log('Script loaded');
+Console.warn('Attention: something is wrong');
+Console.error('An error occurred: ' + errorMessage);
+Console.debug('Variable x = ' + x);
+```
+
+---
+
+## Commands - Commands
+
+Register and manage server commands.
+
+### Register Command
+
+```javascript
+Commands.register(name, handler, permission);
+```
+
+| Parameter | Type | Description |
+|----------|-----|---------|
+| `name` | string | Command name |
+| `handler` | function | Handler function |
+| `permission` | string | Access permission (optional) |
+
+### Command Handler
+
+```javascript
+function handler(sender, args) {
+    // sender - command sender
+    // args - argument array
+}
+```
+
+### Examples
+
+#### Simple Command
+
+```javascript
+Commands.register('hello', function(sender, args) {
+    sender.sendMessage('§aHello, ' + sender.getName() + '!');
+});
+```
+
+#### Command with Permissions
+
+```javascript
+Commands.register('heal', function(sender, args) {
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    player.setHealth(player.getMaxHealth());
+    player.sendMessage('§aYou have been healed!');
+}, 'scriptslab.heal');
+```
+
+#### Command with Arguments
+
+```javascript
+Commands.register('warp', function(sender, args) {
+    if (args.length === 0) {
+        sender.sendMessage('§cUsage: /warp <name>');
+        return;
+    }
+    
+    var warpName = args[0];
+    // Teleportation logic
+    sender.sendMessage('§aTeleporting to §e' + warpName);
+});
+```
+
+#### Command with Player Check
+
+```javascript
+Commands.register('fly', function(sender, args) {
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    var canFly = player.getAllowFlight();
+    player.setAllowFlight(!canFly);
+    
+    var msg = !canFly ? '§aFlight enabled!' : '§cFlight disabled!';
+    player.sendMessage(msg);
+}, 'scriptslab.fly');
+```
+
+---
+
+## Events - Events
+
+Handle Bukkit events.
+
+### Subscribe to Event
+
+```javascript
+Events.on(eventName, handler);
+```
+
+| Parameter | Type | Description |
+|----------|-----|---------|
+| `eventName` | string | Event name (e.g., PlayerJoinEvent) |
+| `handler` | function | Handler function |
+
+### Event Handler
+
+```javascript
+function handler(event) {
+    // event - Bukkit event object
+}
+```
+
+### Available Events
+
+#### Player Events
+
+| Event | Description |
+|---------|---------|
+| `PlayerJoinEvent` | Player join |
+| `PlayerQuitEvent` | Player quit |
+| `PlayerChatEvent` | Chat (sync) |
+| `AsyncPlayerChatEvent` | Chat (async) |
+| `PlayerMoveEvent` | Movement |
+| `PlayerInteractEvent` | Interaction |
+| `PlayerItemHeldEvent` | Item held change |
+| `PlayerDeathEvent` | Death |
+| `PlayerRespawnEvent` | Respawn |
+
+#### Entity Events
+
+| Event | Description |
+|---------|---------|
+| `EntityDamageEvent` | Taking damage |
+| `EntityDamageByEntityEvent` | Damage by entity |
+| `EntityDeathEvent` | Entity death |
+| `EntityShootBowEvent` | Bow shoot |
+
+#### Block Events
+
+| Event | Description |
+|---------|---------|
+| `BlockPlaceEvent` | Block place |
+| `BlockBreakEvent` | Block break |
+| `BlockInteractEvent` | Block interaction |
+
+### Examples
+
+#### Player Join
+
+```javascript
+Events.on('PlayerJoinEvent', function(event) {
+    var player = event.getPlayer();
+    player.sendMessage('§aWelcome!');
+    Console.log(player.getName() + ' joined the server');
+});
+```
+
+#### Player Quit
+
+```javascript
+Events.on('PlayerQuitEvent', function(event) {
+    var player = event.getPlayer();
+    Console.log(player.getName() + ' left the server');
+});
+```
+
+#### Chat
+
+```javascript
+Events.on('AsyncPlayerChatEvent', function(event) {
+    var player = event.getPlayer();
+    var message = event.getMessage();
+    
+    // Bad word filter
+    if (message.toLowerCase().indexOf('badword') !== -1) {
+        event.setCancelled(true);
+        player.sendMessage('§cYou can't say that!');
+        return;
+    }
+});
+```
+
+#### Player Death
+
+```javascript
+Events.on('PlayerDeathEvent', function(event) {
+    var entity = event.getEntity();
+    var killer = entity.getKiller();
+    
+    if (killer !== null) {
+        Console.log(entity.getName() + ' was killed by ' + killer.getName());
+    }
+});
+```
+
+#### Player Damage
+
+```javascript
+Events.on('EntityDamageByEntityEvent', function(event) {
+    var damager = event.getDamager();
+    var victim = event.getEntity();
+    
+    // Check if attacker is player
+    var Player = Java.type('org.bukkit.entity.Player');
+    if (damager instanceof Player) {
+        Console.log(damager.getName() + ' attacked ' + victim.getName());
+    }
+});
+```
+
+---
+
+## Scheduler - Task Scheduler
+
+Schedule delayed and repeating tasks.
+
+> **Important**: All Bukkit API methods are automatically executed on the main thread!
+
+### Methods
+
+#### runLater - Execute Once
+
+```javascript
+Scheduler.runLater(handler, delay);
+```
+
+| Parameter | Type | Description |
+|----------|-----|---------|
+| `handler` | function | Function to execute |
+| `delay` | integer | Delay in ticks (20 ticks = 1 second) |
+
+```javascript
+// Execute after 5 seconds (100 ticks)
+Scheduler.runLater(function() {
+    player.sendMessage('§aMessage after 5 seconds!');
+}, 100);
+```
+
+#### runTimer - Repeating Task
+
+```javascript
+Scheduler.runTimer(handler, delay, period);
+```
+
+| Parameter | Type | Description |
+|----------|-----|---------|
+| `handler` | function | Function to execute |
+| `delay` | integer | Initial delay |
+| `period` | integer | Repeat interval |
+
+```javascript
+// Execute every minute (1200 ticks)
+Scheduler.runTimer(function() {
+    Server.broadcast('§eDon\'t forget to vote!');
+}, 0, 1200);
+```
+
+### Examples
+
+#### Delayed Message
+
+```javascript
+Scheduler.runLater(function() {
+    Server.broadcast('§eServer will restart in 10 minutes!');
+}, 12000); // 12000 ticks = 10 minutes
+```
+
+#### Repeating Announcement
+
+```javascript
+var messages = [
+    '§eDon\'t forget to vote!',
+    '§aJoin our Discord!',
+    '§6Vote for the server!'
+];
+
+var index = 0;
+
+Scheduler.runTimer(function() {
+    Server.broadcast(messages[index]);
+    index = (index + 1) % messages.length;
+}, 0, 6000); // Every 5 minutes
+```
+
+#### Timer with Cancel
+
+```javascript
+// Save task ID
+var taskId = Scheduler.runTimer(function() {
+    // Code
+}, 0, 20);
+
+// Cancel task
+// Scheduler.cancel(taskId);
+```
+
+---
+
+## Players - Players
+
+Player management.
+
+### Methods
+
+#### get - Get Player
+
+```javascript
+var player = Players.get('NickName');
+```
+
+| Parameter | Type | Description |
+|----------|-----|---------|
+| `name` | string | Player name |
+
+```javascript
+var player = Players.get('Steve');
+if (player !== null) {
+    player.sendMessage('§aHello!');
+}
+```
+
+#### getAll - All Online Players
+
+```javascript
+var players = Players.getAll();
+```
+
+```javascript
+var players = Players.getAll();
+for (var i = 0; i < players.length; i++) {
+    players[i].sendMessage('§eAnnouncement for everyone!');
+}
+```
+
+#### teleport - Teleport
+
+```javascript
+Players.teleport(player, world, x, y, z);
+```
+
+```javascript
+var player = Players.get('Steve');
+var world = org.bukkit.Bukkit.getWorld('world');
+Players.teleport(player, world, 0, 100, 0);
+```
+
+#### giveItem - Give Item
+
+```javascript
+Players.giveItem(player, itemId, amount);
+```
+
+```javascript
+var player = Players.get('Steve');
+Players.giveItem(player, 'custom_sword', 1);
+```
+
+---
+
+## Server - Server
+
+Server management.
+
+### Methods
+
+#### broadcast - Message Everyone
+
+```javascript
+Server.broadcast(message);
+```
+
+```javascript
+Server.broadcast('§aHello to all players!');
+```
+
+#### executeCommand - Execute Command
+
+```javascript
+Server.executeCommand(command);
+```
+
+```javascript
+Server.executeCommand('say Message from server!');
+Server.executeCommand('give Steve DIAMOND 1');
+```
+
+#### getOnlinePlayers - Online Players
+
+```javascript
+var players = Server.getOnlinePlayers();
+```
+
+```javascript
+var count = Server.getOnlinePlayers().size();
+Console.log('Online: ' + count);
+```
+
+---
+
+## World - World
+
+World management.
+
+### Methods
+
+#### get - Get World
+
+```javascript
+var world = World.get('world_name');
+```
+
+```javascript
+var world = World.get('world');
+```
+
+#### setTime - Set Time
+
+```javascript
+World.setTime(world, time);
+```
+
+```javascript
+var world = World.get('world');
+World.setTime(world, 1000); // Day (0-24000)
+```
+
+#### setWeather - Set Weather
+
+```javascript
+World.setWeather(world, weather);
+```
+
+```javascript
+var world = World.get('world');
+World.setWeather(world, 'CLEAR');  // Clear
+World.setWeather(world, 'RAIN');   // Rain
+World.setWeather(world, 'THUNDER'); // Thunder
+```
+
+#### spawnEntity - Spawn Entity
+
+```javascript
+World.spawnEntity(world, x, y, z, entityType);
+```
+
+```javascript
+var world = World.get('world');
+World.spawnEntity(world, 0, 100, 0, 'ZOMBIE');
+World.spawnEntity(world, 0, 100, 0, 'CREEPER');
+```
+
+---
+
+## Items - Items
+
+Create custom items.
+
+### Methods
+
+#### create - Create Item
+
+```javascript
+var item = Items.create(id, material, displayName);
+```
+
+| Parameter | Type | Description |
+|----------|-----|---------|
+| `id` | string | Unique ID |
+| `material` | string | Material (e.g., DIAMOND_SWORD) |
+| `displayName` | string | Display name |
+
+```javascript
+var sword = Items.create('fire_sword', 'DIAMOND_SWORD', '§cFire Sword');
+sword.setLore(['§7Ignites enemies']);
+```
+
+#### setLore - Set Description
+
+```javascript
+item.setLore(loreArray);
+```
+
+```javascript
+var sword = Items.create('fire_sword', 'DIAMOND_SWORD', '§cFire Sword');
+sword.setLore([
+    '§7Ignites enemies',
+    '§cLegendary item'
+]);
+```
+
+#### addAbility - Add Ability
+
+```javascript
+item.addAbility(triggerType, handler);
+```
+
+| triggerType | Description |
+|-------------|----------|
+| `HIT` | On hit |
+| `RIGHT_CLICK` | Right click |
+| `LEFT_CLICK` | Left click |
+
+```javascript
+var sword = Items.create('fire_sword', 'DIAMOND_SWORD', '§cFire Sword');
+sword.setLore(['§7Ignites enemies']);
+
+sword.addAbility('HIT', function(player, target, item) {
+    target.setFireTicks(100); // Ignite for 5 seconds
+    player.sendMessage('§cEnemy is burning!');
+});
+
+Items.register(sword);
+```
+
+#### register - Register Item
+
+```javascript
+Items.register(item);
+```
+
+```javascript
+Items.register(sword);
+```
+
+---
+
+## Storage - Storage
+
+Save and load data.
+
+### Methods
+
+#### save - Save Data
+
+```javascript
+Storage.save(key, value);
+```
+
+```javascript
+Storage.save('player.steve.coins', 100);
+Storage.save('player.steve.level', 5);
+```
+
+#### load - Load Data
+
+```javascript
+Storage.load(key).then(function(value) {
+    // value - loaded value
+});
+```
+
+```javascript
+Storage.load('player.steve.coins').then(function(coins) {
+    if (coins === null) {
+        coins = 0;
+    }
+    Console.log('Coins: ' + coins);
+});
+```
+
+#### delete - Delete Data
+
+```javascript
+Storage.delete(key);
+```
+
+```javascript
+Storage.delete('player.steve.temp');
+```
+
+#### exists - Check Existence
+
+```javascript
+Storage.exists(key).then(function(exists) {
+    if (exists) {
+        Console.log('Data exists');
+    }
+});
+```
+
+---
+
+## API - Extended API
+
+Additional methods for convenient work.
+
+### Methods
+
+#### registerEvent - Register Event
+
+```javascript
+API.registerEvent(eventName, handler);
+```
+
+```javascript
+API.registerEvent('PlayerJoinEvent', function(event) {
+    var player = event.getPlayer();
+    player.sendMessage('§aWelcome!');
+});
+```
+
+#### broadcast - Message Everyone
+
+```javascript
+API.broadcast(message);
+```
+
+```javascript
+API.broadcast('§eAnnouncement for everyone!');
+```
+
+#### getOnlinePlayers - Get Players
+
+```javascript
+var players = API.getOnlinePlayers();
+```
+
+```javascript
+var count = API.getOnlinePlayers().size();
+```
+
+#### strikeLightningSync - Lightning (Safe)
+
+```javascript
+API.strikeLightningSync(location);
+```
+
+```javascript
+API.strikeLightningSync(player.getLocation());
+```
+
+#### addPotionEffectSync - Potion Effect (Safe)
+
+```javascript
+API.addPotionEffectSync(player, effectType, duration, amplifier, ambient, particles);
+```
+
+```javascript
+var PotionEffectType = Java.type('org.bukkit.potion.PotionEffectType');
+API.addPotionEffectSync(player, PotionEffectType.SPEED, 999999, 2, false, false);
+```
+
+#### removePotionEffectSync - Remove Effect (Safe)
+
+```javascript
+API.removePotionEffectSync(player, effectType);
+```
+
+```javascript
+var PotionEffectType = Java.type('org.bukkit.potion.PotionEffectType');
+API.removePotionEffectSync(player, PotionEffectType.SPEED);
+```
+
+#### addAttribute - Item Attribute
+
+```javascript
+API.addAttribute(itemMeta, attributeName, modifierName, value, operation, slot);
+```
+
+| Parameter | Description |
+|----------|---------|
+| `itemMeta` | ItemMeta of item |
+| `attributeName` | GENERIC_ATTACK_DAMAGE, GENERIC_ATTACK_SPEED, etc. |
+| `modifierName` | Unique modifier name |
+| `value` | Value |
+| `operation` | ADD_NUMBER, MULTIPLY_SCALAR_1 |
+| `slot` | HAND, FEET, LEGS, etc. |
+
+```javascript
+var Attribute = Java.type('org.bukkit.attribute.Attribute');
+var AttributeModifier = Java.type('org.bukkit.attribute.AttributeModifier');
+var UUID = Java.type('java.util.UUID');
+
+API.addAttribute(meta, 'GENERIC_ATTACK_DAMAGE', 'damage_boost', 10.0, 'ADD_NUMBER', 'HAND');
+```
+
+#### log - Logging
+
+```javascript
+API.log(message);
+```
+
+```javascript
+API.log('Script loaded');
+```
+
+---
+
+## Working with Java
+
+ScriptsLab allows using Java classes directly.
+
+### Import Classes
+
+```javascript
+var Material = Java.type('org.bukkit.Material');
+var ItemStack = Java.type('org.bukkit.inventory.ItemStack');
+var Enchantment = Java.type('org.bukkit.enchantments.Enchantment');
+var ItemFlag = Java.type('org.bukkit.inventory.ItemFlag');
+var Attribute = Java.type('org.bukkit.attribute.Attribute');
+var AttributeModifier = Java.type('org.bukkit.attribute.AttributeModifier');
+var EquipmentSlot = Java.type('org.bukkit.inventory.EquipmentSlot');
+var UUID = Java.type('java.util.UUID');
+var ArrayList = Java.type('java.util.ArrayList');
+var PotionEffect = Java.type('org.bukkit.potion.PotionEffect');
+var PotionEffectType = Java.type('org.bukkit.potion.PotionEffectType');
+```
+
+### Creating Objects
+
+```javascript
+var item = new ItemStack(Material.DIAMOND_SWORD);
+item.setAmount(64);
+
+var list = new ArrayList();
+list.add('element');
+```
+
+### Using Methods
+
+```javascript
+item.setAmount(64);
+list.add('element');
+var size = list.size();
+```
+
+### instanceof - Type Check
+
+```javascript
+var Player = Java.type('org.bukkit.entity.Player');
+if (entity instanceof Player) {
+    // This is a player
+}
+```
+
+---
+
+## Working with Command Sender
+
+### Sender Types
+
+| Method | Description |
+|--------|---------|
+| `sender.isPlayer()` | Check if sender is player |
+| `sender.isOp()` | Check if sender is OP |
+
+### Examples
+
+```javascript
+Commands.register('test', function(sender, args) {
+    // Check if player
+    if (!sender.isPlayer()) {
+        sender.sendMessage('§cOnly for players!');
+        return;
+    }
+    
+    var player = sender;
+    player.sendMessage('§aHello, player!');
+});
+```
+
+### Getting Player from Sender
+
+```javascript
+var player = sender; // If checked with isPlayer()
+```
+
+---
+
+## Error Handling
+
+### try-catch
+
+```javascript
+try {
+    // Your code
+    var result = dangerousOperation();
+} catch (error) {
+    Console.error('Error: ' + error);
+}
+```
+
+### Null Check
+
+```javascript
+var player = Players.get('Steve');
+if (player !== null) {
+    // Safe to use
+} else {
+    Console.warn('Player not found');
+}
+```
+
+---
+
+## Data Types
+
+### JavaScript → Java
+
+| JavaScript | Java |
+|-----------|------|
+| `number` | int, double, float |
+| `string` | String |
+| `boolean` | boolean |
+| `array` | ArrayList, List |
+| `function` | Consumer, Function |
+| `object` | Object |
+
+### Java → JavaScript
+
+| Java | JavaScript |
+|------|----------|
+| `int` | number |
+| `double` | number |
+| `boolean` | boolean |
+| `String` | string |
+| `List` | array |
+| `Map` | object |
+| `Object` | object |
+
+---
+
+## Limitations
+
+- **Timeout**: 5 seconds by default (configurable)
+- **Memory**: 128MB per script (configurable)
+- **Sandbox**: Limited Java API access (when sandbox: true)
+- **Threads**: GraalVM JS is single-threaded
+
+---
+
+## Next Steps
+
+| Step | Description |
+|-----|----------|
+| [Examples](examples/) | Ready-made script examples |
+| [Modules](modules.md) | Module system |
+| [Security](configuration.md#security) | Security setup |

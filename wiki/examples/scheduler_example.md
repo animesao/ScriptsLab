@@ -258,7 +258,7 @@ Console.log('Таймер арены настроен');
 | 600 | 30 секунд | Средние задачи |
 | 1200 | 1 минута | Автосохранение |
 | 6000 | 5 минут | Объявления |
-| 12000 | 10 минут | Напомина��ия |
+| 12000 | 10 минут | Напоминания |
 
 ---
 
@@ -297,3 +297,297 @@ var taskId = Scheduler.runTimer(function() {
 | [Команды](commands.md) | Примеры команд |
 | [События](events.md) | Обработка событий |
 | [Предметы](items.md) | Кастомные предметы |
+
+---
+
+# ⏰ Scheduler Examples (English)
+
+Ready-to-use task scheduling examples for ScriptsLab.
+
+---
+
+## Delayed Task
+
+Executes code once after specified delay.
+
+```javascript
+/**
+ * Scheduler.runLater - Execute once
+ * 
+ * 20 ticks = 1 second
+ */
+Console.log('Starting delayed task...');
+
+// Execute after 5 seconds (100 ticks)
+Scheduler.runLater(function() {
+    Server.broadcast('§eMessage after 5 seconds!');
+    Console.log('Delayed task executed');
+}, 100);
+
+Console.log('Task scheduled');
+```
+
+---
+
+## Repeating Task
+
+Executes code at regular intervals.
+
+```javascript
+/**
+ * Scheduler.runTimer - Repeating task
+ */
+var counter = 0;
+
+// Execute every second (20 ticks)
+var taskId = Scheduler.runTimer(function() {
+    counter++;
+    Server.broadcast('§eCounter: ' + counter);
+    
+    if (counter >= 10) {
+        // Stop after 10 executions
+        // Note: needs implementation in current version
+        Console.log('Task completed');
+    }
+}, 0, 20); // 0 = start immediately, 20 = every second
+
+Console.log('Repeating task started, ID: ' + taskId);
+```
+
+---
+
+## Auto Broadcasts
+
+Shows different messages at regular intervals.
+
+```javascript
+/**
+ * Auto broadcasts
+ */
+var messages = [
+    '§6[Broadcast] §eDon\'t forget to vote for the server!',
+    '§6[Broadcast] §eJoin our Discord!',
+    '§6[Broadcast] §eUse §a/fly §e for flight!',
+    '§6[Broadcast] §eUse §a/heal §e to heal!'
+];
+
+var currentIndex = 0;
+
+// Broadcast every 5 minutes (6000 ticks)
+Scheduler.runTimer(function() {
+    Server.broadcast(messages[currentIndex]);
+    currentIndex = (currentIndex + 1) % messages.length;
+}, 100, 6000); // 100 = first after 5 sec, 6000 = every 5 min
+
+Console.log('Auto broadcasts started');
+```
+
+---
+
+## Auto Save
+
+Automatically saves player data.
+
+```javascript
+/**
+ * Auto save data
+ */
+Console.log('Starting auto save...');
+
+// Every 5 minutes
+Scheduler.runTimer(function() {
+    var online = Server.getOnlinePlayers();
+    
+    if (online.size() >0) {
+        // Save each player's data
+        for (var i = 0; i < online.size(); i++) {
+            var player = online.get(i);
+            var key = 'player.' + player.getUniqueId() + '.lastsave';
+            
+            Storage.save(key, Date.now());
+        }
+        
+        Console.log('Saved data for ' + online.size() + ' players');
+    }
+}, 0, 6000); // Every 5 minutes
+
+Console.log('Auto save configured');
+```
+
+---
+
+## Countdown Timer
+
+Starts a countdown.
+
+```javascript
+/**
+ * Countdown to event
+ */
+var seconds = 10;
+
+var countdown = Scheduler.runTimer(function() {
+    if (seconds >0) {
+        Server.broadcast('§eTime left: ' + seconds + ' seconds');
+        seconds--;
+    } else {
+        Server.broadcast('§aTime is up!');
+        // Code after countdown ends here
+        Console.log('Countdown completed');
+    }
+}, 0, 20); // Every second
+
+Console.log('Countdown started');
+```
+
+---
+
+## Online Check
+
+Regularly checks player count.
+
+```javascript
+/**
+ * Check online status
+ */
+var checkInterval = function() {
+    var players = Server.getOnlinePlayers();
+    Console.log('Online: ' + players.size() + ' players');
+    
+    // Check minimum online
+    if (players.size() === 0) {
+        Console.log('No players on server!');
+    }
+};
+
+// Check every 2 minutes
+Scheduler.runTimer(function() {
+    checkInterval();
+}, 0, 2400);
+
+Console.log('Online check configured');
+```
+
+---
+
+## Rule Reminders
+
+Reminds rules at intervals.
+
+```javascript
+/**
+ * Rule reminders
+ */
+var reminders = [
+    '§eRemember server rules: §aNo Griefing!',
+    '§eDon\'t spam in chat!',
+    '§eRespect other players!',
+    '§eCheck §a/help §e for commands'
+];
+
+var index = 0;
+
+// Every 10 minutes
+Scheduler.runTimer(function() {
+    Server.broadcast(reminders[index]);
+    index = (index + 1) % reminders.length;
+}, 0, 12000);
+
+Console.log('Reminders configured');
+```
+
+---
+
+## PvP Arena - Round Timer
+
+Manages rounds in arena.
+
+```javascript
+/**
+ * PvP Arena round timer
+ */
+var roundTime = 300; // 5 minutes in seconds (ticks)
+var isRoundActive = false;
+
+var roundTimer = Scheduler.runTimer(function() {
+    if (!isRoundActive) {
+        return;
+    }
+    
+    roundTime--;
+    
+    // Show remaining time
+    if (roundTime === 60) {
+        Server.broadcast('§eRound ends in: §c1 minute!');
+    } else if (roundTime === 30) {
+        Server.broadcast('§eRound ends in: §c30 seconds!');
+    } else if (roundTime <= 10 && roundTime >0) {
+        Server.broadcast('§c' + roundTime + '...');
+    } else if (roundTime === 0) {
+        Server.broadcast('§cRound over!');
+        isRoundActive = false;
+        
+        // End round logic here
+    }
+}, 0, 1); // Every second
+
+// Function to start round
+var startRound = function() {
+    roundTime = 300;
+    isRoundActive = true;
+    Server.broadcast('§aRound started! Good luck!');
+};
+
+Console.log('Arena timer configured');
+```
+
+---
+
+## Tick Intervals
+
+| Interval (ticks) | Time | Usage |
+|------------------|-------|---------------|
+| 20 | 1 second | Quick checks |
+| 100 | 5 seconds | Messages |
+| 600 | 30 seconds | Medium tasks |
+| 1200 | 1 minute | Auto save |
+| 6000 | 5 minutes | Broadcasts |
+| 12000 | 10 minutes | Reminders |
+
+---
+
+## Task Cancellation
+
+> **Note**: In current version, task cancellation requires additional implementation. Save task ID for future cancellation.
+
+```javascript
+// Save task ID
+var taskId = Scheduler.runTimer(function() {
+    // Code
+}, 0, 20);
+
+// To cancel (requires implementation in future)
+// Scheduler.cancel(taskId);
+```
+
+---
+
+## Best Practices
+
+1. **Don't execute heavy operations in timers** - use `runLater` for delayed tasks
+
+2. **Check online before sending** - avoid errors when no players
+
+3. **Use meaningful intervals** - don't overload server with too frequent tasks
+
+4. **Log important events** - record task execution to console
+
+---
+
+## Next Steps
+
+| Step | Description |
+|-----|----------|
+| [Commands](commands.md) | Command examples |
+| [Events](events.md) | Event handling |
+| [Items](items.md) | Custom items |

@@ -441,3 +441,449 @@ mymodule/
 | [Script API](script-api.md) | API для скриптов |
 | [Конфигурация](configuration.md) | Настройка плагина |
 | [Примеры](examples/) | Готовые примеры |
+
+---
+
+# 🔌 ScriptsLab Module System (English)
+
+Complete guide to ScriptsLab module system.
+
+---
+
+## What are Modules?
+
+Modules in ScriptsLab are reusable functionality packages that can be loaded or disabled independently from each other.
+
+### Module Advantages
+
+| Advantage | Description |
+|--------------|----------|
+| 🔄 **Hot Loading** | Enable/disable without server restart |
+| 📦 **Reusability** | One module can be used on different servers |
+| 🔒 **Isolation** | Modules don't depend on each other (unless specified) |
+| 🛠️ **Development Convenience** | Simple structure and API |
+
+---
+
+## Module Structure
+
+```
+modules/
+└── mymodule/
+    ├── module.yml       # Module configuration
+    └── scripts/         # Module scripts (optional)
+        └── script.js
+```
+
+### module.yml
+
+```yaml
+# Module configuration
+id: mymodule
+name: My Module
+version: 1.0.0
+description: My custom module
+authors:
+  - MyName
+
+# Dependencies
+dependencies: []
+soft-dependencies: []
+
+# Load order: STARTUP, POSTWORLD, or LAZY
+load-order: STARTUP
+
+# Enabled by default
+enabled: true
+```
+
+---
+
+## module.yml Parameters
+
+### id
+
+**Description**: Unique module identifier
+
+**Type**: `string`
+
+**Example**: `id: economy`
+
+---
+
+### name
+
+**Description**: Display name of module
+
+**Type**: `string`
+
+**Example**: `name: Economy System`
+
+---
+
+### version
+
+**Description**: Module version
+
+**Type**: `string`
+
+**Example**: `version: 1.0.0`
+
+---
+
+### description
+
+**Description**: Module description
+
+**Type**: `string`
+
+**Example**: `description: Economy system`
+
+---
+
+### authors
+
+**Description**: Module authors
+
+**Type**: `list`
+
+**Example**:
+```yaml
+authors:
+  - MyName
+  - OtherAuthor
+```
+
+---
+
+### dependencies
+
+**Description**: Modules that must be loaded before this module
+
+**Type**: `list`
+
+**Example**:
+```yaml
+dependencies:
+  - economy
+  - customitems
+```
+
+---
+
+### soft-dependencies
+
+**Description**: Recommended modules to load
+
+**Type**: `list`
+
+**Example**:
+```yaml
+soft-dependencies:
+  - tokens
+```
+
+---
+
+### load-order
+
+**Description**: Module load order
+
+**Type**: `string`
+
+| Value | Description |
+|----------|-----------|
+| `STARTUP` | Load on startup |
+| `POSTWORLD` | Load after world |
+| `LAZY` | Load on first use |
+
+**Example**:
+```yaml
+load-order: STARTUP
+```
+
+---
+
+### enabled
+
+**Description**: Module enabled by default
+
+**Type**: `boolean`
+
+**Example**:
+```yaml
+enabled: true
+```
+
+---
+
+## Module Management
+
+### Management Commands
+
+| Command | Description |
+|---------|----------|
+| `/module list` | List all modules |
+| `/module enable <name>` | Enable module |
+| `/module disable <name>` | Disable module |
+| `/module reload <name>` | Reload module |
+
+---
+
+## Example Module: Demo
+
+Let's look at the demo module example:
+
+**File**: `plugins/ScriptsLab/modules/demo/module.yml`
+
+```yaml
+id: demo
+name: Demo Module
+version: 1.0.0
+description: Demonstration module showcasing framework capabilities
+authors:
+  - Framework Team
+
+dependencies: []
+soft-dependencies: []
+
+load-order: STARTUP
+
+enabled: true
+```
+
+---
+
+## Creating Your Own Module
+
+### Step 1: Create Folder
+
+Create folder `plugins/ScriptsLab/modules/mymodule/`
+
+### Step 2: Create module.yml
+
+Create `module.yml` file:
+
+```yaml
+id: mymodule
+name: My Module
+version: 1.0.0
+description: Description of my module
+authors:
+  - YourName
+
+load-order: STARTUP
+enabled: true
+```
+
+### Step 3: Add Scripts (Optional)
+
+Create `scripts/` folder and add scripts.
+
+### Step 4: Enable Module
+
+Add module to `config.yml`:
+
+```yaml
+modules:
+  enabled-modules:
+    - mymodule
+```
+
+### Step 5: Reload
+
+Execute `/module reload` or restart server.
+
+---
+
+## Module Configuration in config.yml
+
+### enabled-modules
+
+**Description**: List of modules to load
+
+**Type**: `list`
+
+**Example**:
+```yaml
+modules:
+  enabled-modules:
+    - demo
+    - economy
+    - customitems
+```
+
+---
+
+### disabled-modules
+
+**Description**: List of modules to disable
+
+**Type**: `list`
+
+**Example**:
+```yaml
+modules:
+  disabled-modules:
+    - debug
+    - testmodule
+```
+
+---
+
+### auto-load
+
+**Description**: Auto-load modules on startup
+
+**Type**: `boolean`
+
+**Default**: `true`
+
+**Example**:
+```yaml
+modules:
+  auto-load: true
+```
+
+---
+
+## Module Dependencies
+
+### Hard Dependencies (dependencies)
+
+Module won't load if dependency is not loaded:
+
+```yaml
+dependencies:
+  - economy
+  - tokens
+```
+
+### Soft Dependencies (soft-dependencies)
+
+Module will load but can use dependency functions:
+
+```yaml
+soft-dependencies:
+  - chat
+```
+
+---
+
+## Best Practices
+
+### 1. Use Clear IDs
+
+```yaml
+id: economy        # Good
+id: economic     # Bad
+id: e            # Bad
+```
+
+### 2. Specify Authors
+
+```yaml
+authors:
+  - YourName
+```
+
+### 3. Document Module
+
+```yaml
+description: |
+  Economy module.
+  Provides shop and currency systems.
+```
+
+### 4. Versioning
+
+```yaml
+version: 1.0.0
+```
+
+---
+
+## Troubleshooting
+
+### Module Not Loading
+
+1. Check `module.yml` syntax
+2. Check dependencies
+3. Check `config.yml`
+
+### Dependency Error
+
+```
+[ScriptsLab] Module 'mymodule' requires 'othermodule' which is not loaded
+```
+
+**Solution**: Add dependent module to `enabled-modules`.
+
+### Name Conflict
+
+```
+[ScriptsLab] Module with ID 'mymodule' already exists
+```
+
+**Solution**: Change module ID.
+
+---
+
+## Module File Structure
+
+```
+mymodule/
+├── module.yml           # Required
+├── scripts/             # Optional
+│   ├── main.js
+│   ├── commands.js
+│   └── events.js
+├── config/              # Optional
+│   └── settings.yml
+└── locale/              # Optional
+    └── messages.yml
+```
+
+---
+
+## Module Examples
+
+### Minimal Module
+
+```
+mymodule/
+└── module.yml
+```
+
+```yaml
+id: mymodule
+name: My Module
+version: 1.0.0
+description: Example module
+authors:
+  - Author
+
+enabled: true
+```
+
+### Full Module
+
+```
+mymodule/
+├── module.yml
+├── scripts/
+│   ├── main.js
+│   └── events.js
+└── config/
+    └── settings.yml
+```
+
+---
+
+## Next Steps
+
+| Step | Description |
+|-----|----------|
+| [Script API](script-api.md) | API for scripts |
+| [Configuration](configuration.md) | Plugin setup |
+| [Examples](examples/) | Ready-made examples |
