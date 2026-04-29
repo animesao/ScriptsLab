@@ -2,9 +2,9 @@ name: ScriptsLab
 version: ${project.version}
 main: com.scriptslab.ScriptsLabPlugin
 api-version: '1.20'
-author: ScriptsLab Team
+author: animesao
 description: Production-grade scriptable plugin framework - Your laboratory for Minecraft scripting
-website: https://github.com/scriptslab/scriptslab
+website: https://github.com/animesao/scriptslab
 
 commands:
   scriptslab:
