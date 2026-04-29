@@ -1,10 +1,12 @@
 package com.scriptslab.core.di;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 /**
  * Lightweight dependency injection container.
@@ -22,7 +24,7 @@ public final class Container {
     private Container() {
         this.singletons = new ConcurrentHashMap<>();
         this.factories = new ConcurrentHashMap<>();
-        this.logger = Logger.getLogger("DI-Container");
+        this.logger = LoggerFactory.getLogger("DI-Container");
     }
     
     /**
@@ -55,7 +57,7 @@ public final class Container {
         }
         
         singletons.put(type, instance);
-        logger.fine("Registered singleton: " + type.getSimpleName());
+        logger.debug("Registered singleton: " + type.getSimpleName());
     }
     
     /**
@@ -71,12 +73,56 @@ public final class Container {
         }
         
         factories.put(type, factory);
-        logger.fine("Registered factory: " + type.getSimpleName());
+        logger.debug("Registered factory: " + type.getSimpleName());
+    }
+    
+    /**
+     * Registers a lazy singleton.
+     * Instance will be created only when first requested.
+     * 
+     * @param type service type
+     * @param factory factory supplier
+     * @param <T> type parameter
+     */
+    public <T> void registerLazySingleton(Class<T> type, Supplier<T> factory) {
+        if (type == null || factory == null) {
+            throw new IllegalArgumentException("Type and factory cannot be null");
+        }
+        
+        LazySingleton<T> lazySingleton = new LazySingleton<>(factory);
+        singletons.put(type, lazySingleton);
+        logger.debug("Registered lazy singleton: " + type.getSimpleName());
+    }
+    
+    /**
+     * Internal class for lazy initialization.
+     */
+    private static class LazySingleton<T> {
+        private volatile T instance;
+        private final Supplier<T> factory;
+        private final Object lock = new Object();
+        
+        LazySingleton(Supplier<T> factory) {
+            this.factory = factory;
+        }
+        
+        @SuppressWarnings("unchecked")
+        T get() {
+            if (instance == null) {
+                synchronized (lock) {
+                    if (instance == null) {
+                        instance = factory.get();
+                    }
+                }
+            }
+            return instance;
+        }
     }
     
     /**
      * Resolves a service by type.
      * First checks singletons, then factories.
+     * Handles LazySingleton for lazy initialization.
      * 
      * @param type service type
      * @param <T> type parameter
@@ -88,13 +134,14 @@ public final class Container {
             return Optional.empty();
         }
         
-        // Check singletons first
         Object singleton = singletons.get(type);
         if (singleton != null) {
+            if (singleton instanceof LazySingleton) {
+                return Optional.of((T) ((LazySingleton<T>) singleton).get());
+            }
             return Optional.of((T) singleton);
         }
         
-        // Try factory
         Supplier<?> factory = factories.get(type);
         if (factory != null) {
             return Optional.of((T) factory.get());
@@ -135,7 +182,7 @@ public final class Container {
     public void unregister(Class<?> type) {
         singletons.remove(type);
         factories.remove(type);
-        logger.fine("Unregistered: " + type.getSimpleName());
+        logger.debug("Unregistered: " + type.getSimpleName());
     }
     
     /**

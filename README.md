@@ -30,6 +30,7 @@ ScriptsLab is a powerful, production-ready plugin framework for Paper/Spigot ser
 | 🎨 **Rich API** | Commands, events, items, storage, scheduler, and more |
 | 📦 **Module System** | Organize code into reusable modules |
 | 🛠️ **Developer Friendly** | Modern JavaScript with full IDE support |
+| ©️ **Official website ** | [website](https://scriptslab.spcfy.eu/) |
 
 ---
 
@@ -67,7 +68,7 @@ ScriptsLab is a powerful, production-ready plugin framework for Paper/Spigot ser
 
 ### Steps
 
-1. **Download** the latest `ScriptsLab-1.0.0.jar` from [Releases](https://github.com/yourusername/ScriptsLab/releases)
+1. **Download** the latest `ScriptsLab-1.0.0.jar` from [Releases](https://github.com/animesao/ScriptsLab/releases)
 
 2. **Install** the plugin:
    ```bash
@@ -368,7 +369,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 - **Issues**: [GitHub Issues](https://github.com/animesao/ScriptsLab/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/animesao/ScriptsLab/discussions)
-- **Wiki**: [Documentation Wiki](https://github.com/animesao/ScriptsLab/tree/main/wiki)
+- **Wiki**: [Documentation Wiki](https://scriptslab.spcfy.eu/wiki)
 
 ---
 

@@ -26,6 +26,7 @@
 | [Модули](modules.md) | Система модулей |
 | [Примеры](examples/) | Готовые примеры скриптов |
 | [FAQ](faq.md) | Часто задаваемые вопросы |
+| [Wiki-Site](https://scriptslab.spcfy.eu/wiki) | официальный сайт |
 
 ---
 
@@ -186,6 +187,7 @@ This Wiki is written for everyone - from beginners who are new to Minecraft serv
 | [Modules](modules.md) | Module system |
 | [Examples](examples/) | Script examples |
 | [FAQ](faq.md) | Frequently asked questions |
+| [Wiki-Site](https://scriptslab.spcfy.eu/wiki) | official website |
 
 ---
 

@@ -81,23 +81,48 @@ public interface EventBus {
     
     /**
      * Event priority levels.
+     * Can be extended by creating instances with custom levels.
      */
-    enum EventPriority {
-        LOWEST(0),
-        LOW(1),
-        NORMAL(2),
-        HIGH(3),
-        HIGHEST(4),
-        MONITOR(5);
-        
+    class EventPriority implements Comparable<EventPriority> {
         private final int level;
         
-        EventPriority(int level) {
+        // Predefined priorities
+        public static final EventPriority LOWEST = new EventPriority(0);
+        public static final EventPriority LOW = new EventPriority(1);
+        public static final EventPriority NORMAL = new EventPriority(2);
+        public static final EventPriority HIGH = new EventPriority(3);
+        public static final EventPriority HIGHEST = new EventPriority(4);
+        public static final EventPriority MONITOR = new EventPriority(5);
+        
+        public EventPriority(int level) {
             this.level = level;
         }
         
         public int getLevel() {
             return level;
+        }
+        
+        @Override
+        public int compareTo(EventPriority other) {
+            return Integer.compare(this.level, other.level);
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            EventPriority that = (EventPriority) obj;
+            return this.level == that.level;
+        }
+        
+        @Override
+        public int hashCode() {
+            return Integer.hashCode(level);
+        }
+        
+        @Override
+        public String toString() {
+            return "EventPriority{level=" + level + "}";
         }
     }
 }

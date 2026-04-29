@@ -20,7 +20,7 @@ This guide explains how to build ScriptsLab from source.
 
 ```bash
 # Clone the repository
-git clone https://github.com/scriptslab/scriptslab.git
+git clone https://github.com/animesao/scriptslab.git
 cd scriptslab
 
 # Build with Maven
@@ -34,7 +34,7 @@ mvn clean package
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/scriptslab/scriptslab.git
+git clone https://github.com/animesao/scriptslab.git
 cd scriptslab
 ```
 
@@ -410,7 +410,7 @@ mvn versions:display-dependency-updates
 
 - **Maven Issues**: [Maven Documentation](https://maven.apache.org/guides/)
 - **Java Issues**: [Java Documentation](https://docs.oracle.com/en/java/)
-- **Build Issues**: [GitHub Issues](https://github.com/scriptslab/scriptslab/issues)
+- **Build Issues**: [GitHub Issues](https://github.com/animesao/scriptslab/issues)
 
 ---
 

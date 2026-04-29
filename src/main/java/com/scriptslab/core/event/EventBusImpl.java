@@ -3,26 +3,26 @@ package com.scriptslab.core.event;
 import com.scriptslab.api.event.EventBus;
 import com.scriptslab.api.event.EventSubscription;
 import com.scriptslab.api.event.PluginEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Thread-safe implementation of EventBus.
  * Uses ConcurrentHashMap and CopyOnWriteArrayList for thread safety.
  */
 public final class EventBusImpl implements EventBus {
-    
+     
     private final Logger logger;
     private final Map<Class<? extends PluginEvent>, List<SubscriptionImpl<?>>> subscribers;
     
     public EventBusImpl() {
-        this.logger = Logger.getLogger("EventBus");
+        this.logger = LoggerFactory.getLogger("EventBus");
         this.subscribers = new ConcurrentHashMap<>();
     }
     
@@ -56,7 +56,7 @@ public final class EventBusImpl implements EventBus {
                         break;
                     }
                 } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Error handling event " + eventType.getSimpleName(), e);
+                    logger.error("Error handling event " + eventType.getSimpleName(), e);
                 }
             }
             
@@ -85,7 +85,7 @@ public final class EventBusImpl implements EventBus {
         subscribers.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>())
                 .add(subscription);
         
-        logger.fine("Subscribed to " + eventType.getSimpleName() + 
+        logger.debug("Subscribed to " + eventType.getSimpleName() + 
                    " with priority " + priority);
         
         return subscription;
@@ -104,7 +104,7 @@ public final class EventBusImpl implements EventBus {
             subs.remove(subscription);
         }
         
-        logger.fine("Unsubscribed from " + subscription.getEventType().getSimpleName());
+        logger.debug("Unsubscribed from " + subscription.getEventType().getSimpleName());
     }
     
     @Override
@@ -126,7 +126,7 @@ public final class EventBusImpl implements EventBus {
             }
         }
         
-        logger.fine("Unsubscribed " + count + " handlers for " + subscriber);
+        logger.debug("Unsubscribed " + count + " handlers for " + subscriber);
     }
     
     @Override

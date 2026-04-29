@@ -32,7 +32,7 @@
 ### Шаг 1: Скачайте плагин
 
 Скачайте последнюю версию плагина:
-- **GitHub Releases**: [scriptslab/releases](https://github.com/scriptslab/scriptslab/releases)
+- **GitHub Releases**: [scriptslab/releases](https://github.com/animesao/scriptslab/releases)
 - Или соберите из исходного кода (см. ниже)
 
 ### Шаг 2: Установите на сервер
@@ -91,7 +91,7 @@ permissions:
 
 ```bash
 # 1. Клонируйте репозиторий
-git clone https://github.com/scriptslab/scriptslab.git
+git clone https://github.com/animesao/scriptslab.git
 cd ScriptsLab
 
 # 2. Соберите плагин
