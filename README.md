@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![ScriptsLab Logo](https://img.shields.io/badge/ScriptsLab-v1.0.0-blue?style=for-the-badge)
+![ScriptsLab Logo](https://img.shields.io/badge/ScriptsLab-v1.0.2-blue?style=for-the-badge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Paper](https://img.shields.io/badge/Paper-1.21.8-green?style=for-the-badge)](https://papermc.io/)
 [![Java](https://img.shields.io/badge/Java-17-orange?style=for-the-badge)](https://adoptium.net/)
