@@ -90,9 +90,15 @@ public final class GraalScriptEngine implements ScriptEngine {
                     }
                 }
                 
-                // Create context with security restrictions based on config
-                // TODO: Read from config file in future versions
-                boolean sandboxEnabled = false; // false = unrestricted (full access)
+                // Read sandbox setting from config
+                boolean sandboxEnabled = false;
+                try {
+                    // scriptAPI is ScriptAPIImpl which holds the plugin reference
+                    if (scriptAPI instanceof com.scriptslab.core.script.ScriptAPIImpl apiImpl) {
+                        sandboxEnabled = apiImpl.getPlugin().getConfig()
+                                .getBoolean("security.sandbox-enabled", false);
+                    }
+                } catch (Exception ignored) {}
                 
                 Context.Builder contextBuilder = Context.newBuilder("js")
                         .engine(engine)
@@ -148,12 +154,22 @@ public final class GraalScriptEngine implements ScriptEngine {
                 // Expose individual API components as global objects
                 jsContext.getBindings("js").putMember("Commands", scriptAPI);
                 jsContext.getBindings("js").putMember("Events", scriptAPI);
-                jsContext.getBindings("js").putMember("Scheduler", scriptAPI);
                 jsContext.getBindings("js").putMember("Players", scriptAPI);
                 jsContext.getBindings("js").putMember("Server", scriptAPI);
                 jsContext.getBindings("js").putMember("World", scriptAPI);
                 jsContext.getBindings("js").putMember("Items", scriptAPI);
-                jsContext.getBindings("js").putMember("Storage", scriptAPI);
+
+                // Expose subsystem APIs
+                if (scriptAPI instanceof com.scriptslab.core.script.ScriptAPIImpl apiImpl) {
+                    jsContext.getBindings("js").putMember("Scheduler", apiImpl.getScheduler());
+                    jsContext.getBindings("js").putMember("Storage", apiImpl.getStorage());
+                    // GUI is exposed after initGUI() is called
+                    apiImpl.initGUI();
+                    jsContext.getBindings("js").putMember("GUI", apiImpl.getGUI());
+                } else {
+                    jsContext.getBindings("js").putMember("Scheduler", scriptAPI);
+                    jsContext.getBindings("js").putMember("Storage", scriptAPI);
+                }
                 
                 scriptsDirectory.toFile().mkdirs();
                 

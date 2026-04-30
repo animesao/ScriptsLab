@@ -140,6 +140,11 @@ public final class ScriptsLabPlugin extends JavaPlugin {
                 storageManager.shutdown().join();
             }
             
+            // 3b. Save script storage data
+            if (scriptEngine != null && scriptEngine.getScriptAPI() instanceof com.scriptslab.core.script.ScriptAPIImpl apiImpl) {
+                apiImpl.getStorage().saveAll();
+            }
+            
             // 4. Cancel all tasks
             if (taskScheduler != null) {
                 taskScheduler.cancelAllTasks();

@@ -1,7 +1,6 @@
 package com.scriptslab.core.script;
 
 import com.scriptslab.ScriptsLabPlugin;
-import com.scriptslab.api.event.EventBus;
 import com.scriptslab.api.item.CustomItem;
 import com.scriptslab.core.item.CustomItemImpl;
 import net.kyori.adventure.text.Component;
@@ -10,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
@@ -26,19 +24,38 @@ public final class ScriptAPIImpl implements Listener {
     
     private final ScriptsLabPlugin plugin;
     private final LegacyComponentSerializer serializer;
-    private java.util.Map eventExecutors;
-    private java.util.Map handlersMap;
+    private final java.util.Map<Class<? extends Event>, org.bukkit.plugin.EventExecutor> eventExecutors;
+    private final java.util.Map<Class<? extends Event>, java.util.List<Runnable>> handlersMap;
     private java.util.Map<String, Object> commandCodeMap;
     private java.util.Map<String, String> commandSourceMap;
+
+    // New subsystems
+    private final ScriptScheduler scriptScheduler;
+    private final ScriptStorage scriptStorage;
+    private ScriptGUI scriptGUI;
     
     public ScriptAPIImpl(ScriptsLabPlugin plugin) {
         this.plugin = plugin;
         this.serializer = LegacyComponentSerializer.legacyAmpersand();
-        this.eventExecutors = new java.util.HashMap();
-        this.handlersMap = new java.util.HashMap();
-        this.commandCodeMap = new java.util.HashMap();
-        this.commandSourceMap = new java.util.HashMap();
+        this.eventExecutors = new java.util.HashMap<>();
+        this.handlersMap = new java.util.HashMap<>();
+        this.commandCodeMap = new java.util.HashMap<>();
+        this.commandSourceMap = new java.util.HashMap<>();
+        this.scriptScheduler = new ScriptScheduler(plugin);
+        this.scriptStorage = new ScriptStorage(plugin);
+        // ScriptGUI is initialized lazily after plugin is fully loaded
     }
+
+    /** Called after plugin is fully initialized to set up GUI listener. */
+    public void initGUI() {
+        if (scriptGUI == null) {
+            scriptGUI = new ScriptGUI(plugin);
+        }
+    }
+
+    public ScriptScheduler getScheduler() { return scriptScheduler; }
+    public ScriptStorage getStorage() { return scriptStorage; }
+    public ScriptGUI getGUI() { return scriptGUI; }
     
     public void storeCommand(String name, Object executor) {
         commandCodeMap.put(name, executor);
@@ -179,7 +196,6 @@ public final class ScriptAPIImpl implements Listener {
         handlers.add(handler);
         
         if (!eventExecutors.containsKey(eventClass)) {
-            final java.util.List<Runnable> finalHandlers = handlers;
             org.bukkit.plugin.EventExecutor executor = (listener, event) -> {
                 java.util.List<Runnable> eventHandlers = (java.util.List<Runnable>) handlersMap.get(event.getClass());
                 if (eventHandlers != null) {
@@ -196,28 +212,50 @@ public final class ScriptAPIImpl implements Listener {
             log("Registered event: " + eventClass.getSimpleName());
         }
     }
-    private final ScriptAPIImpl scriptAPIImplListener = this;
     
     // === Scheduler ===
-    // NOTE: Disabled due to GraalVM JS multithreading restrictions
-    // JS callbacks cannot be invoked from Bukkit scheduler
-    
-    public void runLater(Runnable task, long ticks) {
-        // Disabled - cannot schedule JS callbacks from different thread
-        plugin.getLogger().warning("Scheduler.runLater() disabled - GraalVM JS restrictions");
+
+    public int runLater(Object callback, long delayTicks) {
+        return scriptScheduler.runLater(callback, delayTicks);
+    }
+
+    public int runTimer(Object callback, long delayTicks, long periodTicks) {
+        return scriptScheduler.runTimer(callback, delayTicks, periodTicks);
+    }
+
+    public int runAsync(Object callback) {
+        return scriptScheduler.runAsync(callback);
+    }
+
+    public void cancelTask(int taskId) {
+        scriptScheduler.cancel(taskId);
+    }
+
+    public void cancelAllTasks() {
+        scriptScheduler.cancelAll();
     }
     
-    public void runAsync(Runnable task) {
-        // Disabled
-        plugin.getLogger().warning("Scheduler.runAsync() disabled - GraalVM JS restrictions");
+    // === Storage API ===
+
+    /**
+     * Opens a persistent storage namespace.
+     * Usage: var db = Storage.open('mydata');
+     */
+    public ScriptStorage.Namespace openStorage(String name) {
+        return scriptStorage.open(name);
     }
-    
-    public int runTimer(Runnable task, long delayTicks, long periodTicks) {
-        // Disabled
-        plugin.getLogger().warning("Scheduler.runTimer() disabled - GraalVM JS restrictions");
-        return -1;
+
+    // === GUI API ===
+
+    /**
+     * Creates a new GUI menu.
+     * Usage: var gui = GUI.create('Title', 27);
+     */
+    public ScriptGUI.GUIInstance createGUI(String title, int size) {
+        if (scriptGUI == null) initGUI();
+        return scriptGUI.create(title, size);
     }
-    
+
     // === Logging ===
     
     public void log(String message) {
@@ -484,105 +522,102 @@ public final class ScriptAPIImpl implements Listener {
     /**
      * Register event handler with JavaScript function.
      * Usage from JS: API.registerEvent('EntityDamageByEntityEvent', function(event) { ... });
+     * Also supports Paper events: API.registerEvent('PlayerJumpEvent', function(event) { ... });
      */
     public void registerEvent(String eventClassName, Object handler) {
         try {
-            // Find event class
-            Class<?> eventClass = null;
-            
-            // Try common packages
-            String[] packages = {
-                "org.bukkit.event.entity.",
-                "org.bukkit.event.player.",
-                "org.bukkit.event.block.",
-                "org.bukkit.event.world.",
-                "org.bukkit.event.server.",
-                "org.bukkit.event.inventory."
-            };
-            
-            for (String pkg : packages) {
-                try {
-                    eventClass = Class.forName(pkg + eventClassName);
-                    break;
-                } catch (ClassNotFoundException ignored) {
-                }
-            }
-            
+            Class<?> eventClass = findEventClass(eventClassName);
+
             if (eventClass == null) {
                 log("Event class not found: " + eventClassName);
                 return;
             }
-            
+
             @SuppressWarnings("unchecked")
             Class<? extends Event> eventType = (Class<? extends Event>) eventClass;
-            
-            // Create event executor that calls the JS function IN SYNC CONTEXT
+
+            // Store handler
+            storeEventHandler(eventClassName, handler);
+
+            // Create event executor that calls the JS function on the main thread
             org.bukkit.plugin.EventExecutor executor = (listener, event) -> {
                 if (eventType.isInstance(event)) {
-                    // Execute in main thread using scheduler
                     plugin.getServer().getScheduler().runTask(plugin, () -> {
                         try {
-                            // Call the JavaScript function with event as parameter
-                            String code = "(function() { " +
-                                    "var handler = API.getEventHandler('" + eventClassName + "'); " +
-                                    "if (handler && typeof handler === 'function') { " +
-                                    "  var event = API.getCurrentEvent(); " +
-                                    "  handler(event); " +
-                                    "} " +
-                                    "})();";
-                            
-                            // Store event temporarily
-                            storeCurrentEvent(event);
-                            
-                            plugin.getScriptEngine().execute(code).exceptionally(ex -> {
-                                log("Error in event handler " + eventClassName + ": " + ex.getMessage());
-                                return null;
-                            }).join();
-                            
+                            Object storedHandler = getEventHandler(eventClassName);
+                            if (storedHandler instanceof org.graalvm.polyglot.Value v && v.canExecute()) {
+                                v.execute(event);
+                            }
                         } catch (Exception e) {
-                            log("Error executing event handler: " + e.getMessage());
+                            log("Error in event handler " + eventClassName + ": " + e.getMessage());
                         }
                     });
                 }
             };
-            
-            // Store handler
-            storeEventHandler(eventClassName, handler);
-            
+
             // Register event
             plugin.getServer().getPluginManager().registerEvent(
-                    eventType, 
-                    this, 
-                    org.bukkit.event.EventPriority.NORMAL, 
-                    executor, 
+                    eventType,
+                    this,
+                    org.bukkit.event.EventPriority.NORMAL,
+                    executor,
                     plugin
             );
-            
+
             log("Registered event handler: " + eventClassName);
-            
+
         } catch (Exception e) {
             log("Failed to register event " + eventClassName + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+    /** Searches for an event class across all known Bukkit and Paper packages. */
+    private Class<?> findEventClass(String eventClassName) {
+        String[] packages = {
+            "org.bukkit.event.player.",
+            "org.bukkit.event.entity.",
+            "org.bukkit.event.block.",
+            "org.bukkit.event.world.",
+            "org.bukkit.event.server.",
+            "org.bukkit.event.inventory.",
+            "org.bukkit.event.vehicle.",
+            "org.bukkit.event.weather.",
+            "org.bukkit.event.hanging.",
+            "io.papermc.paper.event.player.",
+            "io.papermc.paper.event.entity.",
+            "io.papermc.paper.event.block.",
+            "io.papermc.paper.event.world.",
+            "io.papermc.paper.event.server.",
+            "com.destroystokyo.paper.event.player.",
+            "com.destroystokyo.paper.event.entity.",
+            "com.destroystokyo.paper.event.server."
+        };
+
+        for (String pkg : packages) {
+            try {
+                return Class.forName(pkg + eventClassName);
+            } catch (ClassNotFoundException ignored) {
+            }
+        }
+
+        // Try fully-qualified name as fallback
+        try {
+            return Class.forName(eventClassName);
+        } catch (ClassNotFoundException ignored) {
+        }
+
+        return null;
+    }
     
-    private java.util.Map<String, Object> eventHandlers = new java.util.HashMap<>();
-    private Event currentEvent;
-    
+    private final java.util.Map<String, Object> eventHandlers = new java.util.HashMap<>();
+
     public void storeEventHandler(String name, Object handler) {
         eventHandlers.put(name, handler);
     }
-    
+
     public Object getEventHandler(String name) {
         return eventHandlers.get(name);
-    }
-    
-    public void storeCurrentEvent(Event event) {
-        this.currentEvent = event;
-    }
-    
-    public Event getCurrentEvent() {
-        return currentEvent;
     }
     
     // === Safe Bukkit API Wrappers (Thread-Safe) ===
